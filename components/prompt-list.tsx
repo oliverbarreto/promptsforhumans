@@ -1,3 +1,5 @@
+"use client"
+
 import Image from "next/image"
 import Link from "next/link"
 import { formatDistanceToNow } from "date-fns"
@@ -12,8 +14,9 @@ export function PromptList({ prompts }: PromptListProps) {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {prompts.map((prompt) => (
-        <div
+        <Link
           key={prompt.id}
+          href={`/prompt/${prompt.id}`}
           className="group relative rounded-lg border p-4 hover:bg-accent transition-colors"
         >
           <div className="flex items-center gap-4">
@@ -49,10 +52,7 @@ export function PromptList({ prompts }: PromptListProps) {
               <span>{prompt.views}</span>
             </div>
           </div>
-          <Link href={`/prompts/${prompt.id}`} className="absolute inset-0">
-            <span className="sr-only">View prompt</span>
-          </Link>
-        </div>
+        </Link>
       ))}
     </div>
   )
