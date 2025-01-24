@@ -11,6 +11,7 @@ import { PromptList } from "@/components/prompt-list"
 import Link from "next/link"
 import type { Group } from "@/types/group"
 import type { Prompt } from "@/types/prompt"
+import { PromptFilter } from "@/components/prompt-filter"
 
 export default function LibraryPage() {
   const [groups, setGroups] = useState<Group[]>([])
@@ -18,6 +19,7 @@ export default function LibraryPage() {
   const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false)
   const [groupToEdit, setGroupToEdit] = useState<Group | undefined>(undefined)
   const [searchTerm, setSearchTerm] = useState("")
+  const [currentFilter, setCurrentFilter] = useState("all")
   const [isFilterVisible, setIsFilterVisible] = useState(true)
   const [filters, setFilters] = useState<Record<string, string[]>>({})
 
@@ -87,9 +89,20 @@ export default function LibraryPage() {
   )
 
   const filteredPrompts = prompts.filter((prompt) => {
+    // Apply search term filter
     const matchesSearch = prompt.title
       .toLowerCase()
       .includes(searchTerm.toLowerCase())
+
+    // Apply visibility filter
+    const matchesVisibility =
+      currentFilter === "all"
+        ? !prompt.isArchived
+        : currentFilter === "archived"
+        ? prompt.isArchived
+        : prompt.visibility === currentFilter && !prompt.isArchived
+
+    // Apply sidebar filters
     const matchesFilters = Object.entries(filters).every(([key, values]) => {
       if (values.length === 0) return true
       if (key === "type") return prompt.type && values.includes(prompt.type)
@@ -100,7 +113,8 @@ export default function LibraryPage() {
         return prompt.visibility && values.includes(prompt.visibility)
       return true
     })
-    return matchesSearch && matchesFilters
+
+    return matchesSearch && matchesVisibility && matchesFilters
   })
 
   return (
@@ -133,7 +147,8 @@ export default function LibraryPage() {
         </div>
       </div>
 
-      <div className="mb-6">
+      <div className="flex items-center gap-4 mb-6">
+        <PromptFilter value={currentFilter} onValueChange={setCurrentFilter} />
         <Input
           type="search"
           placeholder="Search prompts and groups..."
