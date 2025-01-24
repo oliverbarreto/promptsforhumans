@@ -1,79 +1,36 @@
 "use client"
 
-import { useState, useEffect, useCallback, useMemo } from "react"
-import Link from "next/link"
-import { MoreVertical, Plus, Search, Star, Filter, FilterX } from "lucide-react"
+import { useState, useEffect, useCallback } from "react"
+import { Plus, Filter, FilterX } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { PromptList } from "@/components/prompt-list"
 import { CreateGroupDialog } from "@/components/create-group-dialog"
 import { FiltersSidebar } from "@/components/filters-sidebar"
-import { cn } from "@/lib/utils"
+import { GroupCard } from "@/components/group-card"
+import { PromptList } from "@/components/prompt-list"
+import Link from "next/link"
 import type { Group } from "@/types/group"
-import type { Prompt, PromptVersion } from "@/types/prompt"
-import { mockPrompts, mockGroups } from "@/data/mock-data"
+import type { Prompt } from "@/types/prompt"
 
 export default function LibraryPage() {
   const [groups, setGroups] = useState<Group[]>([])
   const [prompts, setPrompts] = useState<Prompt[]>([])
   const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false)
+  const [groupToEdit, setGroupToEdit] = useState<Group | undefined>(undefined)
   const [searchTerm, setSearchTerm] = useState("")
   const [isFilterVisible, setIsFilterVisible] = useState(true)
-  const [filters, setFilters] = useState<Record<string, string[]>>({
-    useCases: [],
-    type: [],
-    language: [],
-    models: [],
-    tools: []
-  })
+  const [filters, setFilters] = useState<Record<string, string[]>>({})
 
   useEffect(() => {
-    // Fetch groups and prompts from localStorage
-    const fetchData = () => {
-      const storedGroups = localStorage.getItem("groups")
-      const storedPrompts = localStorage.getItem("prompts")
+    const storedGroups = localStorage.getItem("groups")
+    const storedPrompts = localStorage.getItem("prompts")
 
-      // Initialize groups
-      if (!storedGroups || JSON.parse(storedGroups).length === 0) {
-        localStorage.setItem("groups", JSON.stringify(mockGroups))
-        setGroups(mockGroups)
-      } else {
-        try {
-          const parsedGroups = JSON.parse(storedGroups)
-          setGroups(parsedGroups)
-        } catch (error) {
-          console.error("Error parsing stored groups:", error)
-          localStorage.setItem("groups", JSON.stringify(mockGroups))
-          setGroups(mockGroups)
-        }
-      }
-
-      // Initialize prompts
-      if (!storedPrompts || JSON.parse(storedPrompts).length === 0) {
-        localStorage.setItem("prompts", JSON.stringify(mockPrompts))
-        setPrompts(mockPrompts)
-      } else {
-        try {
-          const parsedPrompts = JSON.parse(storedPrompts)
-          setPrompts(parsedPrompts)
-        } catch (error) {
-          console.error("Error parsing stored prompts:", error)
-          localStorage.setItem("prompts", JSON.stringify(mockPrompts))
-          setPrompts(mockPrompts)
-        }
-      }
+    if (storedGroups) {
+      setGroups(JSON.parse(storedGroups))
     }
-
-    fetchData()
+    if (storedPrompts) {
+      setPrompts(JSON.parse(storedPrompts))
+    }
   }, [])
 
   const handleCreateGroup = (newGroup: Group) => {
@@ -81,6 +38,19 @@ export default function LibraryPage() {
     setGroups(updatedGroups)
     localStorage.setItem("groups", JSON.stringify(updatedGroups))
     setIsCreateGroupOpen(false)
+  }
+
+  const handleEditGroup = (updatedGroup: Group) => {
+    const updatedGroups = groups.map((group) =>
+      group.id === updatedGroup.id ? updatedGroup : group
+    )
+    setGroups(updatedGroups)
+    localStorage.setItem("groups", JSON.stringify(updatedGroups))
+    setGroupToEdit(undefined)
+  }
+
+  const handleStartEditGroup = (group: Group) => {
+    setGroupToEdit(group)
   }
 
   const handleDeleteGroup = (groupId: string) => {
@@ -112,223 +82,118 @@ export default function LibraryPage() {
     []
   )
 
-  const filterPrompts = useCallback(
-    (term: string, sidebarFilters: Record<string, string[]>) => {
-      let filtered = prompts
-
-      // Apply search term filter
-      if (term) {
-        const lowercasedSearchTerm = term.toLowerCase()
-        filtered = filtered.filter(
-          (prompt) =>
-            prompt.title.toLowerCase().includes(lowercasedSearchTerm) ||
-            (prompt.description?.toLowerCase() || "").includes(
-              lowercasedSearchTerm
-            ) ||
-            prompt.tags.some((tag) =>
-              tag.toLowerCase().includes(lowercasedSearchTerm)
-            )
-        )
-      }
-
-      // Apply sidebar filters
-      Object.entries(sidebarFilters).forEach(([key, values]) => {
-        if (values.length > 0) {
-          filtered = filtered.filter((prompt) => {
-            if (key === "useCases" || key === "models" || key === "tools") {
-              const value = prompt.versions[0][key as keyof PromptVersion]
-              return (
-                Array.isArray(value) &&
-                value.some((v: string) => values.includes(v))
-              )
-            } else if (Array.isArray(prompt[key as keyof Prompt])) {
-              return (prompt[key as keyof Prompt] as string[]).some((value) =>
-                values.includes(value)
-              )
-            } else {
-              const value = prompt[key as keyof Prompt]
-              return values.includes(value as string)
-            }
-          })
-        }
-      })
-
-      return filtered
-    },
-    [prompts]
+  const filteredGroups = groups.filter((group) =>
+    group.name.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
-  const filteredPrompts = useMemo(() => {
-    return filterPrompts(searchTerm, filters)
-  }, [filterPrompts, searchTerm, filters])
+  const filteredPrompts = prompts.filter((prompt) => {
+    const matchesSearch = prompt.title
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase())
+    const matchesFilters = Object.entries(filters).every(([key, values]) => {
+      if (values.length === 0) return true
+      if (key === "type") return prompt.type && values.includes(prompt.type)
+      if (key === "language")
+        return prompt.language && values.includes(prompt.language)
+      if (key === "model") return prompt.model && values.includes(prompt.model)
+      if (key === "visibility")
+        return prompt.visibility && values.includes(prompt.visibility)
+      return true
+    })
+    return matchesSearch && matchesFilters
+  })
 
   return (
-    <div className="flex gap-8 items-start">
-      <div
-        className={cn(
-          "flex-1 space-y-8",
-          isFilterVisible ? "max-w-[calc(100%-320px)]" : "max-w-full"
-        )}
-      >
-        <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold">Your Library</h1>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setIsCreateGroupOpen(true)}
-            >
-              Create group
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-3xl font-bold">Library</h1>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => setIsCreateGroupOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            New Group
+          </Button>
+          <Link href="/create">
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Create Prompt
             </Button>
-            <Link href="/create">
-              <Button>Create prompt</Button>
-            </Link>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setIsFilterVisible(!isFilterVisible)}
-              title={isFilterVisible ? "Hide filters" : "Show filters"}
-            >
-              {isFilterVisible ? (
-                <FilterX className="h-4 w-4" />
-              ) : (
-                <Filter className="h-4 w-4" />
-              )}
-            </Button>
-          </div>
+          </Link>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setIsFilterVisible(!isFilterVisible)}
+            title={isFilterVisible ? "Hide filters" : "Show filters"}
+          >
+            {isFilterVisible ? (
+              <FilterX className="h-4 w-4" />
+            ) : (
+              <Filter className="h-4 w-4" />
+            )}
+          </Button>
         </div>
+      </div>
 
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
+      <div className="mb-6">
+        <Input
+          type="search"
+          placeholder="Search prompts and groups..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="max-w-md"
+        />
+      </div>
+
+      <div className="flex gap-6">
+        <div className={`flex-1 space-y-6`}>
+          <div className="space-y-4">
             <h2 className="text-2xl font-semibold">Groups</h2>
-            <Button variant="link">See less</Button>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {groups.map((group) => (
-              <Card key={group.id}>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-lg font-medium">
-                    <Link
-                      href={`/library/groups/${encodeURIComponent(group.id)}`}
-                      className="hover:underline"
-                    >
-                      {group.name}
-                    </Link>
-                    {group.isFavorite && (
-                      <Star className="inline-block ml-2 h-4 w-4 fill-yellow-400 text-yellow-400" />
-                    )}
-                  </CardTitle>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem
-                        onClick={() => handleToggleFavorite(group.id)}
-                      >
-                        {group.isFavorite
-                          ? "Remove from favorites"
-                          : "Add to favorites"}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <Link
-                          href={`/library/groups/${encodeURIComponent(
-                            group.id
-                          )}/edit`}
-                        >
-                          Edit group
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        className="text-destructive"
-                        onClick={() => handleDeleteGroup(group.id)}
-                      >
-                        Delete group
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">
-                    {group.promptCount} prompts
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-
-        <Tabs defaultValue="recent">
-          <div className="flex items-center justify-between">
-            <TabsList>
-              <TabsTrigger value="recent">Recent</TabsTrigger>
-              <TabsTrigger value="favorites">Favorites</TabsTrigger>
-              <TabsTrigger value="owned">Owned by me</TabsTrigger>
-              <TabsTrigger value="templates">Templates</TabsTrigger>
-            </TabsList>
-            <div className="relative w-64">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search prompts..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-8"
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredGroups.map((group) => (
+                <GroupCard
+                  key={group.id}
+                  group={group}
+                  onDelete={handleDeleteGroup}
+                  onToggleFavorite={handleToggleFavorite}
+                  onEdit={handleStartEditGroup}
+                />
+              ))}
             </div>
           </div>
 
-          <TabsContent value="recent" className="mt-4">
+          <div className="space-y-4">
+            <h2 className="text-2xl font-semibold">Prompts</h2>
             <PromptList
               prompts={filteredPrompts}
               onUpdatePrompt={handleUpdatePrompt}
             />
-          </TabsContent>
-          <TabsContent value="favorites" className="mt-4">
-            <PromptList
-              prompts={filteredPrompts.filter((p) => p.isFavorite)}
-              onUpdatePrompt={handleUpdatePrompt}
-            />
-          </TabsContent>
-          <TabsContent value="owned" className="mt-4">
-            <PromptList
-              prompts={filteredPrompts}
-              onUpdatePrompt={handleUpdatePrompt}
-            />
-          </TabsContent>
-          <TabsContent value="templates" className="mt-4">
-            <PromptList
-              prompts={filteredPrompts}
-              onUpdatePrompt={handleUpdatePrompt}
-            />
-          </TabsContent>
-        </Tabs>
-      </div>
+          </div>
+        </div>
 
-      <div
-        className={cn(
-          "fixed md:relative inset-y-0 right-0 z-50 w-[300px] bg-background border-l md:border-none transition-transform duration-200 ease-in-out",
-          "md:w-[300px] md:sticky md:top-8",
-          isFilterVisible ? "translate-x-0" : "translate-x-full md:hidden"
-        )}
-      >
-        <div className="relative h-full md:h-auto">
-          <div className="p-4 md:p-0">
+        <div
+          className={`w-[300px] transition-all duration-200 ${
+            isFilterVisible ? "block" : "hidden"
+          }`}
+        >
+          <div className="sticky top-4">
             <FiltersSidebar
               prompts={prompts}
-              onFilterChange={handleSidebarFilterChange}
               selectedFilters={filters}
+              onFilterChange={handleSidebarFilterChange}
             />
           </div>
         </div>
       </div>
 
       <CreateGroupDialog
-        open={isCreateGroupOpen}
-        onOpenChange={setIsCreateGroupOpen}
-        onSubmit={handleCreateGroup}
+        open={isCreateGroupOpen || groupToEdit !== undefined}
+        onOpenChange={(open) => {
+          if (!open) {
+            setIsCreateGroupOpen(false)
+            setGroupToEdit(undefined)
+          }
+        }}
+        onSubmit={groupToEdit ? handleEditGroup : handleCreateGroup}
+        initialGroup={groupToEdit}
       />
     </div>
   )

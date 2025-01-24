@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -20,47 +20,78 @@ interface CreateGroupDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onSubmit: (group: Group) => void
+  initialGroup?: Group
 }
 
 export function CreateGroupDialog({
   open,
   onOpenChange,
-  onSubmit
+  onSubmit,
+  initialGroup
 }: CreateGroupDialogProps) {
-  const [name, setName] = useState("")
-  const [description, setDescription] = useState("")
-  const [visibility, setVisibility] = useState<"public" | "private">("public")
+  const [name, setName] = useState(initialGroup?.name || "")
+  const [description, setDescription] = useState(
+    initialGroup?.description || ""
+  )
+  const [visibility, setVisibility] = useState<"public" | "private">(
+    initialGroup?.visibility || "public"
+  )
+
+  // Reset form when dialog opens/closes or initialGroup changes
+  useEffect(() => {
+    if (initialGroup) {
+      setName(initialGroup.name)
+      setDescription(initialGroup.description)
+      setVisibility(initialGroup.visibility)
+    } else {
+      setName("")
+      setDescription("")
+      setVisibility("public")
+    }
+  }, [initialGroup, open])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    const newGroup: Group = {
-      id: String(Date.now()),
-      name,
-      description,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      isFavorite: false,
-      promptCount: 0,
-      authorId: "current-user", // This would come from auth
-      visibility,
-      prompts: [] // Initialize empty prompts array
+    if (initialGroup) {
+      // Update existing group
+      const updatedGroup: Group = {
+        ...initialGroup,
+        name,
+        description,
+        visibility,
+        updatedAt: new Date().toISOString()
+      }
+      onSubmit(updatedGroup)
+    } else {
+      // Create new group
+      const newGroup: Group = {
+        id: String(Date.now()),
+        name,
+        description,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        isFavorite: false,
+        promptCount: 0,
+        authorId: "current-user", // This would come from auth
+        visibility,
+        prompts: [] // Initialize empty prompts array
+      }
+      onSubmit(newGroup)
     }
-
-    onSubmit(newGroup)
-    setName("")
-    setDescription("")
-    setVisibility("public")
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create new group</DialogTitle>
+          <DialogTitle>
+            {initialGroup ? "Edit group" : "Create new group"}
+          </DialogTitle>
           <DialogDescription>
-            Create a new group to organize your prompts. Groups can be public or
-            private.
+            {initialGroup
+              ? "Edit your group details. Groups can be public or private."
+              : "Create a new group to organize your prompts. Groups can be public or private."}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
@@ -103,7 +134,9 @@ export function CreateGroupDialog({
             </div>
           </div>
           <DialogFooter>
-            <Button type="submit">Create group</Button>
+            <Button type="submit">
+              {initialGroup ? "Save changes" : "Create group"}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

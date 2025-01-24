@@ -21,6 +21,10 @@ import type { Prompt } from "@/types/prompt"
 import type { Group } from "@/types/group"
 
 export default function CreatePromptPage() {
+  const router = useRouter()
+  const searchParams = new URLSearchParams(window.location.search)
+  const groupId = searchParams.get("groupId")
+
   const [prompt, setPrompt] = useState<Partial<Prompt>>({
     title: "",
     content: "",
@@ -31,14 +35,13 @@ export default function CreatePromptPage() {
     language: "",
     model: "",
     visibility: "public",
-    groupId: undefined
+    groupId: groupId || undefined
   })
   const [groups, setGroups] = useState<Group[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState(false)
   const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false)
-  const router = useRouter()
 
   useEffect(() => {
     const storedGroups = localStorage.getItem("groups")
@@ -46,6 +49,14 @@ export default function CreatePromptPage() {
       setGroups(JSON.parse(storedGroups))
     }
   }, [])
+
+  // Update groupId when URL parameter changes
+  useEffect(() => {
+    setPrompt((prev) => ({
+      ...prev,
+      groupId: groupId || undefined
+    }))
+  }, [groupId])
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>

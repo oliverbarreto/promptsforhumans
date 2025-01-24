@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Check } from "lucide-react"
+import { Check, ChevronsUpDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import {
   Accordion,
@@ -89,19 +89,22 @@ export function FiltersSidebar({
   selectedFilters
 }: FiltersSidebarProps) {
   const [openItems, setOpenItems] = useState<string[]>([])
+  const filterSections = ["Use Cases", "Type", "Language", "Models", "Tools"]
 
   const getUniqueValuesWithCount = (key: string): FilterOption[] => {
     const valueCount = new Map<string, number>()
 
     prompts.forEach((prompt) => {
       if (key === "useCases" || key === "models" || key === "tools") {
-        prompt.versions[0][key as keyof PromptVersion].forEach(
-          (value: string) => {
+        const values = prompt.versions[0][key as keyof PromptVersion]
+        if (Array.isArray(values)) {
+          values.forEach((value: string) => {
             valueCount.set(value, (valueCount.get(value) || 0) + 1)
-          }
-        )
+          })
+        }
       } else if (Array.isArray(prompt[key as keyof Prompt])) {
-        prompt[key as keyof Prompt].forEach((value: string) => {
+        const values = prompt[key as keyof Prompt] as string[]
+        values.forEach((value: string) => {
           valueCount.set(value, (valueCount.get(value) || 0) + 1)
         })
       } else if (prompt[key as keyof Prompt]) {
@@ -136,31 +139,48 @@ export function FiltersSidebar({
     setOpenItems(value)
   }
 
-  const collapseAll = () => {
-    setOpenItems([])
+  const toggleAllSections = () => {
+    setOpenItems(
+      openItems.length === filterSections.length ? [] : filterSections
+    )
+  }
+
+  const clearFilters = () => {
+    onFilterChange({
+      useCases: [],
+      type: [],
+      language: [],
+      models: [],
+      tools: []
+    })
   }
 
   return (
     <div className="w-full rounded-lg border bg-card p-4">
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-semibold">Filters</h2>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => {
-            onFilterChange({
-              useCases: [],
-              type: [],
-              language: [],
-              models: [],
-              tools: []
-            })
-            collapseAll()
-          }}
-          className="text-sm"
-        >
-          Clear all
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={clearFilters}
+            className="text-sm"
+          >
+            Clear all
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleAllSections}
+            title={
+              openItems.length === filterSections.length
+                ? "Collapse all"
+                : "Expand all"
+            }
+          >
+            <ChevronsUpDown className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
       <Accordion
         type="multiple"

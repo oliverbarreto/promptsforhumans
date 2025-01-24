@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useParams } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, Plus } from "lucide-react"
 import { PromptList } from "@/components/prompt-list"
 import type { Group } from "@/types/group"
 import type { Prompt } from "@/types/prompt"
@@ -103,12 +103,20 @@ export default function GroupPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <Link href="/library">
-        <Button variant="ghost" className="mb-4">
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Library
-        </Button>
-      </Link>
+      <div className="flex items-center justify-between mb-4">
+        <Link href="/library">
+          <Button variant="ghost">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Library
+          </Button>
+        </Link>
+        <Link href={`/create?groupId=${group.id}`}>
+          <Button>
+            <Plus className="mr-2 h-4 w-4" />
+            Create Prompt
+          </Button>
+        </Link>
+      </div>
 
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">{group.name}</h1>
@@ -118,10 +126,16 @@ export default function GroupPage() {
       {prompts.length > 0 ? (
         <PromptList prompts={prompts} onUpdatePrompt={handleUpdatePrompt} />
       ) : (
-        <div className="flex items-center justify-center h-64">
-          <p className="text-lg text-muted-foreground">
+        <div className="flex flex-col items-center justify-center h-64">
+          <p className="text-lg text-muted-foreground mb-4">
             No prompts in this group yet
           </p>
+          <Link href={`/create?groupId=${group.id}`}>
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Create Your First Prompt
+            </Button>
+          </Link>
         </div>
       )}
     </div>
