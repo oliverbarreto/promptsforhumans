@@ -4,7 +4,12 @@ import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
+} from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 import {
   ChevronLeft,
@@ -21,14 +26,17 @@ import {
   Sun,
   User,
   LogIn,
+  HomeIcon,
+  SearchIcon
 } from "lucide-react"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 const navItems = [
   { name: "Home", icon: Home, href: "/" },
   { name: "Explore", icon: Compass, href: "/explore" },
   { name: "Library", icon: Library, href: "/library" },
   { name: "Templates", icon: FileText, href: "/templates" },
-  { name: "Workflows", icon: GitBranch, href: "/workflows" },
+  { name: "Workflows", icon: GitBranch, href: "/workflows" }
 ]
 
 const bottomNavItems = [{ name: "Settings", icon: Settings, href: "/settings" }]
@@ -48,7 +56,7 @@ export function Sidebar({ isAuthenticated }: SidebarProps) {
       <aside
         className={cn(
           "flex flex-col h-screen bg-background border-r transition-all duration-300",
-          isCollapsed ? "w-16" : "w-64",
+          isCollapsed ? "w-16" : "w-64"
         )}
       >
         <div className="flex items-center justify-between p-4">
@@ -66,14 +74,21 @@ export function Sidebar({ isAuthenticated }: SidebarProps) {
                     <Link href={item.href}>
                       <Button
                         variant={pathname === item.href ? "secondary" : "ghost"}
-                        className={cn("w-full justify-start", isCollapsed && "justify-center")}
+                        className={cn(
+                          "w-full justify-start",
+                          isCollapsed && "justify-center"
+                        )}
                       >
                         <item.icon className="h-5 w-5" />
-                        {!isCollapsed && <span className="ml-2">{item.name}</span>}
+                        {!isCollapsed && (
+                          <span className="ml-2">{item.name}</span>
+                        )}
                       </Button>
                     </Link>
                   </TooltipTrigger>
-                  {isCollapsed && <TooltipContent side="right">{item.name}</TooltipContent>}
+                  {isCollapsed && (
+                    <TooltipContent side="right">{item.name}</TooltipContent>
+                  )}
                 </Tooltip>
               </li>
             ))}
@@ -84,19 +99,30 @@ export function Sidebar({ isAuthenticated }: SidebarProps) {
             <Tooltip key={item.name}>
               <TooltipTrigger asChild>
                 <Link href={item.href}>
-                  <Button variant="ghost" className={cn("w-full justify-start", isCollapsed && "justify-center")}>
+                  <Button
+                    variant="ghost"
+                    className={cn(
+                      "w-full justify-start",
+                      isCollapsed && "justify-center"
+                    )}
+                  >
                     <item.icon className="h-5 w-5" />
                     {!isCollapsed && <span className="ml-2">{item.name}</span>}
                   </Button>
                 </Link>
               </TooltipTrigger>
-              {isCollapsed && <TooltipContent side="right">{item.name}</TooltipContent>}
+              {isCollapsed && (
+                <TooltipContent side="right">{item.name}</TooltipContent>
+              )}
             </Tooltip>
           ))}
           <WhatsNewButton isCollapsed={isCollapsed} />
           <ContactButton isCollapsed={isCollapsed} />
           <ThemeToggle isCollapsed={isCollapsed} />
-          <ProfileButton isCollapsed={isCollapsed} isAuthenticated={isAuthenticated} />
+          <ProfileButton
+            isCollapsed={isCollapsed}
+            isAuthenticated={isAuthenticated}
+          />
         </div>
       </aside>
     </TooltipProvider>
@@ -108,7 +134,13 @@ function WhatsNewButton({ isCollapsed }: { isCollapsed: boolean }) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Button variant="ghost" className={cn("w-full justify-start", isCollapsed && "justify-center")}>
+        <Button
+          variant="ghost"
+          className={cn(
+            "w-full justify-start",
+            isCollapsed && "justify-center"
+          )}
+        >
           <Bell className="h-5 w-5" />
           {!isCollapsed && <span className="ml-2">What's New</span>}
         </Button>
@@ -123,7 +155,13 @@ function ContactButton({ isCollapsed }: { isCollapsed: boolean }) {
     <Tooltip>
       <TooltipTrigger asChild>
         <Link href="/contact">
-          <Button variant="ghost" className={cn("w-full justify-start", isCollapsed && "justify-center")}>
+          <Button
+            variant="ghost"
+            className={cn(
+              "w-full justify-start",
+              isCollapsed && "justify-center"
+            )}
+          >
             <Mail className="h-5 w-5" />
             {!isCollapsed && <span className="ml-2">Contact</span>}
           </Button>
@@ -134,35 +172,42 @@ function ContactButton({ isCollapsed }: { isCollapsed: boolean }) {
   )
 }
 
-function ThemeToggle({ isCollapsed }: { isCollapsed: boolean }) {
-  // Implement theme toggle logic here
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button variant="ghost" className={cn("w-full justify-start", isCollapsed && "justify-center")}>
-          <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-          <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-          {!isCollapsed && <span className="ml-2">Toggle theme</span>}
-        </Button>
-      </TooltipTrigger>
-      {isCollapsed && <TooltipContent side="right">Toggle theme</TooltipContent>}
-    </Tooltip>
-  )
-}
-
-function ProfileButton({ isCollapsed, isAuthenticated }: { isCollapsed: boolean; isAuthenticated: boolean }) {
+function ProfileButton({
+  isCollapsed,
+  isAuthenticated
+}: {
+  isCollapsed: boolean
+  isAuthenticated: boolean
+}) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
         <Link href={isAuthenticated ? "/profile" : "/signin"}>
-          <Button variant="ghost" className={cn("w-full justify-start", isCollapsed && "justify-center")}>
-            {isAuthenticated ? <User className="h-5 w-5" /> : <LogIn className="h-5 w-5" />}
-            {!isCollapsed && <span className="ml-2">{isAuthenticated ? "Profile" : "Sign In"}</span>}
+          <Button
+            variant="ghost"
+            className={cn(
+              "w-full justify-start",
+              isCollapsed && "justify-center"
+            )}
+          >
+            {isAuthenticated ? (
+              <User className="h-5 w-5" />
+            ) : (
+              <LogIn className="h-5 w-5" />
+            )}
+            {!isCollapsed && (
+              <span className="ml-2">
+                {isAuthenticated ? "Profile" : "Sign In"}
+              </span>
+            )}
           </Button>
         </Link>
       </TooltipTrigger>
-      {isCollapsed && <TooltipContent side="right">{isAuthenticated ? "Profile" : "Sign In"}</TooltipContent>}
+      {isCollapsed && (
+        <TooltipContent side="right">
+          {isAuthenticated ? "Profile" : "Sign In"}
+        </TooltipContent>
+      )}
     </Tooltip>
   )
 }
-

@@ -7,28 +7,24 @@ const inter = Inter({ subsets: ["latin"] })
 
 export const metadata = {
   title: "PromptHub",
-  description: "The GitHub for AI prompts",
+  description: "The GitHub for AI prompts"
 }
 
 export default function RootLayout({
-  children,
+  children
 }: {
   children: React.ReactNode
 }) {
-  // Mock authentication state
-  const isAuthenticated = true
-
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <div className="flex h-screen">
-            <Sidebar isAuthenticated={isAuthenticated} />
-            <main className="flex-1 overflow-y-auto p-8">{children}</main>
+        <ThemeProvider>
+          <div className="flex min-h-screen">
+            <Sidebar isAuthenticated={false} />
+            <main className="flex-1 p-8">{children}</main>
           </div>
         </ThemeProvider>
       </body>
     </html>
   )
 }
-

@@ -10,7 +10,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -19,31 +19,10 @@ import { CreateGroupDialog } from "@/components/create-group-dialog"
 import type { Group } from "@/types/group"
 import type { Prompt } from "@/types/prompt"
 import { PromptCard } from "@/components/prompt-card"
-
-// Mock data -  This section will likely need to be replaced with actual data fetching
-const mockPrompts: Prompt[] = [
-  {
-    id: 1,
-    title: "Prompt 1",
-    description: "Description 1",
-    isFavorite: false,
-  },
-  {
-    id: 2,
-    title: "Prompt 2",
-    description: "Description 2",
-    isFavorite: true,
-  },
-  {
-    id: 3,
-    title: "Prompt 3",
-    description: "Description 3",
-    isFavorite: false,
-  },
-]
+import { mockPrompts, mockGroups } from "@/data/mock-data"
 
 export default function LibraryPage() {
-  const [groups, setGroups] = useState<Group[]>([])
+  const [groups, setGroups] = useState<Group[]>(mockGroups)
   const [prompts, setPrompts] = useState(mockPrompts)
   const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
@@ -81,14 +60,16 @@ export default function LibraryPage() {
 
   const handleToggleFavorite = (groupId: number) => {
     const updatedGroups = groups.map((group) =>
-      group.id === groupId ? { ...group, isFavorite: !group.isFavorite } : group,
+      group.id === groupId ? { ...group, isFavorite: !group.isFavorite } : group
     )
     setGroups(updatedGroups)
     localStorage.setItem("groups", JSON.stringify(updatedGroups))
   }
 
   const filteredPrompts = searchTerm
-    ? prompts.filter((prompt) => prompt.title.toLowerCase().includes(searchTerm.toLowerCase()))
+    ? prompts.filter((prompt) =>
+        prompt.title.toLowerCase().includes(searchTerm.toLowerCase())
+      )
     : prompts
 
   return (
@@ -116,10 +97,15 @@ export default function LibraryPage() {
             <Card key={group.id}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-lg font-medium">
-                  <Link href={`/library/groups/${group.id}`} className="hover:underline">
+                  <Link
+                    href={`/library/groups/${group.id}`}
+                    className="hover:underline"
+                  >
                     {group.name}
                   </Link>
-                  {group.isFavorite && <Star className="inline-block ml-2 h-4 w-4 fill-yellow-400 text-yellow-400" />}
+                  {group.isFavorite && (
+                    <Star className="inline-block ml-2 h-4 w-4 fill-yellow-400 text-yellow-400" />
+                  )}
                 </CardTitle>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -128,21 +114,32 @@ export default function LibraryPage() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => handleToggleFavorite(group.id)}>
-                      {group.isFavorite ? "Remove from favorites" : "Add to favorites"}
+                    <DropdownMenuItem
+                      onClick={() => handleToggleFavorite(group.id)}
+                    >
+                      {group.isFavorite
+                        ? "Remove from favorites"
+                        : "Add to favorites"}
                     </DropdownMenuItem>
                     <DropdownMenuItem>
-                      <Link href={`/library/groups/${group.id}/edit`}>Edit group</Link>
+                      <Link href={`/library/groups/${group.id}/edit`}>
+                        Edit group
+                      </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem className="text-destructive" onClick={() => handleDeleteGroup(group.id)}>
+                    <DropdownMenuItem
+                      className="text-destructive"
+                      onClick={() => handleDeleteGroup(group.id)}
+                    >
                       Delete group
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground">{group.promptCount} prompts</p>
+                <p className="text-sm text-muted-foreground">
+                  {group.promptCount} prompts
+                </p>
               </CardContent>
             </Card>
           ))}
@@ -185,8 +182,11 @@ export default function LibraryPage() {
         </Tabs>
       </div>
 
-      <CreateGroupDialog open={isCreateGroupOpen} onOpenChange={setIsCreateGroupOpen} onSubmit={handleCreateGroup} />
+      <CreateGroupDialog
+        open={isCreateGroupOpen}
+        onOpenChange={setIsCreateGroupOpen}
+        onSubmit={handleCreateGroup}
+      />
     </div>
   )
 }
-
