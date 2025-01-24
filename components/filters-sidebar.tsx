@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/accordion"
 import { Checkbox } from "@/components/ui/checkbox"
 import type { Prompt, PromptVersion } from "@/types/prompt"
+import { Button } from "@/components/ui/button"
 
 interface FilterOption {
   value: string
@@ -87,6 +88,8 @@ export function FiltersSidebar({
   onFilterChange,
   selectedFilters
 }: FiltersSidebarProps) {
+  const [openItems, setOpenItems] = useState<string[]>([])
+
   const getUniqueValuesWithCount = (key: string): FilterOption[] => {
     const valueCount = new Map<string, number>()
 
@@ -129,10 +132,42 @@ export function FiltersSidebar({
     })
   }
 
+  const handleAccordionChange = (value: string[]) => {
+    setOpenItems(value)
+  }
+
+  const collapseAll = () => {
+    setOpenItems([])
+  }
+
   return (
     <div className="w-full rounded-lg border bg-card p-4">
-      <h2 className="font-semibold mb-4">Filters</h2>
-      <Accordion type="multiple" className="w-full">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="font-semibold">Filters</h2>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => {
+            onFilterChange({
+              useCases: [],
+              type: [],
+              language: [],
+              models: [],
+              tools: []
+            })
+            collapseAll()
+          }}
+          className="text-sm"
+        >
+          Clear all
+        </Button>
+      </div>
+      <Accordion
+        type="multiple"
+        className="w-full"
+        value={openItems}
+        onValueChange={handleAccordionChange}
+      >
         <FilterGroup
           title="Use Cases"
           options={useCaseOptions}

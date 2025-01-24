@@ -10,7 +10,14 @@ import { useDebounce } from "@/hooks/use-debounce"
 import type { Prompt } from "@/types/prompt"
 import { Input } from "@/components/ui/input"
 import { mockPrompts } from "@/data/mock-data"
-import { SlidersHorizontal, X } from "lucide-react"
+import {
+  SlidersHorizontal,
+  X,
+  PanelRightClose,
+  PanelRightOpen,
+  Filter,
+  FilterX
+} from "lucide-react"
 import { cn } from "@/lib/utils"
 
 function PromptGrid({
@@ -205,22 +212,30 @@ export default function ExplorePage() {
 
   return (
     <div className="flex gap-8 items-start">
-      <div className="flex-1 max-w-[calc(100%-320px)] space-y-8">
+      <div
+        className={cn(
+          "flex-1 space-y-8",
+          isFilterVisible ? "max-w-[calc(100%-320px)]" : "max-w-full"
+        )}
+      >
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold">Explore Prompts</h1>
           <div className="flex items-center gap-2">
+            <Link href="/create">
+              <Button>Create Prompt</Button>
+            </Link>
             <Button
               variant="outline"
               size="icon"
               onClick={() => setIsFilterVisible(!isFilterVisible)}
-              className="md:hidden"
-              title="Toggle filters"
+              title={isFilterVisible ? "Hide filters" : "Show filters"}
             >
-              <SlidersHorizontal className="h-4 w-4" />
+              {isFilterVisible ? (
+                <FilterX className="h-4 w-4" />
+              ) : (
+                <Filter className="h-4 w-4" />
+              )}
             </Button>
-            <Link href="/create">
-              <Button>Create Prompt</Button>
-            </Link>
           </div>
         </div>
         {prompts.length === 0 ? (
@@ -257,8 +272,8 @@ export default function ExplorePage() {
       <div
         className={cn(
           "fixed md:relative inset-y-0 right-0 z-50 w-[300px] bg-background border-l md:border-none transition-transform duration-200 ease-in-out",
-          "md:translate-x-0 md:w-[300px] md:sticky md:top-8",
-          isFilterVisible ? "translate-x-0" : "translate-x-full"
+          "md:w-[300px] md:sticky md:top-8",
+          isFilterVisible ? "translate-x-0" : "translate-x-full md:hidden"
         )}
       >
         <div className="relative h-full md:h-auto">
@@ -272,17 +287,6 @@ export default function ExplorePage() {
           </Button>
 
           <div className="p-4 md:p-0">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="font-semibold">Filters</h2>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleClearFilters}
-                className="text-sm"
-              >
-                Clear all
-              </Button>
-            </div>
             <FiltersSidebar
               prompts={prompts}
               onFilterChange={handleSidebarFilterChange}
