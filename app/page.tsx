@@ -3,14 +3,12 @@
 import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { CommandSearch } from "@/components/command-search"
+import { Input } from "@/components/ui/input"
 import { FiltersSidebar } from "@/components/filters-sidebar"
 import { PromptCard } from "@/components/prompt-card"
-import { useDebounce } from "@/hooks/use-debounce"
 import type { Prompt } from "@/types/prompt"
-import { Input } from "@/components/ui/input"
 import { mockPrompts } from "@/data/mock-data"
-import { Filter, FilterX } from "lucide-react"
+import { Filter, FilterX, Plus } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 function PromptGrid({
@@ -37,7 +35,6 @@ export default function HomePage() {
   const [prompts, setPrompts] = useState<Prompt[]>([])
   const [filteredPrompts, setFilteredPrompts] = useState<Prompt[]>([])
   const [searchTerm, setSearchTerm] = useState("")
-  const [currentFilter, setCurrentFilter] = useState("all")
   const [filters, setFilters] = useState<Record<string, string[]>>({
     useCases: [],
     type: [],
@@ -45,10 +42,7 @@ export default function HomePage() {
     models: [],
     tools: []
   })
-  const [error, setError] = useState<string | null>(null)
   const [isFilterVisible, setIsFilterVisible] = useState(true)
-
-  const debouncedSearchTerm = useDebounce(searchTerm, 300)
 
   useEffect(() => {
     const fetchPrompts = async () => {
@@ -65,7 +59,6 @@ export default function HomePage() {
         }
       } catch (error) {
         console.error("Error fetching prompts:", error)
-        setError("Failed to load prompts. Please try refreshing the page.")
       }
     }
 
@@ -73,94 +66,49 @@ export default function HomePage() {
   }, [])
 
   const filterPrompts = useCallback(
-    (
-      term: string,
-      filter: string,
-      sidebarFilters: Record<string, string[]>
-    ) => {
-      let filtered = prompts
+    (term: string, sidebarFilters: Record<string, string[]>) => {
+      return prompts.filter((prompt) => {
+        // Apply search term filter
+        const matchesSearch =
+          term === "" || prompt.title.toLowerCase().includes(term.toLowerCase())
 
-      // Apply visibility/status filter
-      switch (filter) {
-        case "public":
-          filtered = filtered.filter(
-            (p) => p.visibility === "public" && !p.isArchived
-          )
-          break
-        case "private":
-          filtered = filtered.filter(
-            (p) => p.visibility === "private" && !p.isArchived
-          )
-          break
-        case "archived":
-          filtered = filtered.filter((p) => p.isArchived)
-          break
-        case "favorites":
-          filtered = filtered.filter((p) => p.isFavorite)
-          break
-        default:
-          // "all" - show all non-archived prompts
-          filtered = filtered.filter((p) => !p.isArchived)
-          break
-      }
-
-      // Apply search term filter
-      if (term !== "") {
-        const lowercasedSearchTerm = term.toLowerCase()
-        filtered = filtered.filter((prompt) => {
-          const titleMatch = prompt.title
-            .toLowerCase()
-            .includes(lowercasedSearchTerm)
-          const contentMatch = prompt.versions[0].content
-            .toLowerCase()
-            .includes(lowercasedSearchTerm)
-          const tags = prompt.tags as string[]
-          const tagsMatch = tags.some((tag) =>
-            tag.toLowerCase().includes(lowercasedSearchTerm)
-          )
-          return titleMatch || contentMatch || tagsMatch
-        })
-      }
-
-      // Apply sidebar filters
-      Object.entries(sidebarFilters).forEach(([key, values]) => {
-        if (values.length > 0) {
-          filtered = filtered.filter((prompt) => {
-            if (key === "useCases" || key === "models" || key === "tools") {
-              return prompt.versions[0][
-                key as keyof (typeof prompt.versions)[0]
-              ].some((value: string) => values.includes(value))
-            } else if (Array.isArray(prompt[key as keyof Prompt])) {
-              return (prompt[key as keyof Prompt] as string[]).some((value) =>
+        // Apply sidebar filters
+        const matchesFilters = Object.entries(sidebarFilters).every(
+          ([key, values]) => {
+            if (values.length === 0) return true
+            if (key === "type")
+              return prompt.type && values.includes(prompt.type)
+            if (key === "language")
+              return prompt.language && values.includes(prompt.language)
+            if (key === "useCases")
+              return prompt.versions[0].useCases.some((value) =>
                 values.includes(value)
               )
-            } else {
-              return values.includes(prompt[key as keyof Prompt] as string)
-            }
-          })
-        }
-      })
+            if (key === "models")
+              return prompt.versions[0].models.some((value) =>
+                values.includes(value)
+              )
+            if (key === "tools")
+              return prompt.versions[0].tools.some((value) =>
+                values.includes(value)
+              )
+            return true
+          }
+        )
 
-      return filtered
+        return matchesSearch && matchesFilters
+      })
     },
     [prompts]
   )
 
   useEffect(() => {
-    const newFilteredPrompts = filterPrompts(
-      debouncedSearchTerm,
-      currentFilter,
-      filters
-    )
+    const newFilteredPrompts = filterPrompts(searchTerm.toLowerCase(), filters)
     setFilteredPrompts(newFilteredPrompts)
-  }, [debouncedSearchTerm, currentFilter, filters, filterPrompts])
+  }, [searchTerm, filters, filterPrompts])
 
   const handleSearch = (term: string) => {
     setSearchTerm(term)
-  }
-
-  const handleFilterChange = (filter: string) => {
-    setCurrentFilter(filter)
   }
 
   const handleSidebarFilterChange = useCallback(
@@ -175,15 +123,13 @@ export default function HomePage() {
       p.id === updatedPrompt.id ? updatedPrompt : p
     )
     setPrompts(updatedPrompts)
-    setFilteredPrompts(
-      filterPrompts(debouncedSearchTerm, currentFilter, filters)
-    )
+    setFilteredPrompts(filterPrompts(searchTerm.toLowerCase(), filters))
     localStorage.setItem("prompts", JSON.stringify(updatedPrompts))
   }
 
   return (
-    <div className="flex flex-col gap-8">
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-16">
+    <div className="flex flex-col">
+      <div className="relative bg-[linear-gradient(135deg,#0033FF,#3366FF,#6699FF)] bg-[length:300%_300%] animate-gradient text-white py-16">
         <div className="container mx-auto px-4">
           <div className="max-w-2xl">
             <h1 className="text-4xl font-bold mb-4">A Prompt Hub for Humans</h1>
@@ -194,17 +140,15 @@ export default function HomePage() {
         </div>
       </div>
 
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between gap-4 mb-8">
-          <CommandSearch
-            onSearch={handleSearch}
-            onFilterChange={handleFilterChange}
-            initialSearchTerm={searchTerm}
-            currentFilter={currentFilter}
-          />
-          <div className="flex items-center gap-2 shrink-0">
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-3xl font-bold">Explore the community</h1>
+          <div className="flex items-center gap-2">
             <Link href="/create">
-              <Button>Create Prompt</Button>
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                Create Prompt
+              </Button>
             </Link>
             <Button
               variant="outline"
@@ -219,6 +163,16 @@ export default function HomePage() {
               )}
             </Button>
           </div>
+        </div>
+
+        <div className="mb-6">
+          <Input
+            type="search"
+            placeholder="Search prompts..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="max-w-md"
+          />
         </div>
 
         <div className="flex gap-8 items-start">

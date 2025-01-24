@@ -24,19 +24,22 @@ This project starts with the goal to facilitate easy access to a library of AI p
 
 Basic features:
 
-- [] Be able to create AI prompts
-- [] Be able to add GROUPS of prompts
-- [] Be able to search within the library, groups and community for AI prompts
-- [] Store your AI prompts
-- [] Side Filter AI prompts by category
+- [x] Be able to create AI prompts
+- [x] Be able to add GROUPS of prompts
+- [x] Be able to search within the library, groups and community for AI prompts
+- [x] Store your AI prompts
+- [x] Side Filter AI prompts by category
 
-- [] Version control for your AI prompts (in an easy way for normal people and need to be a developer to do it)
+- [x] Version control for your AI prompts (in an easy way for normal people and need to be a developer to do it)
 
 Advanced & Collaborative features:
 
 - [] Be able to add WORKFLOWS of prompts visually
 - [] Be able to add TEMPLATES of prompts
 - [] prompt generator for topic
+- library of proposed prompts
+
+- [] add laguage support to translate prompts
 
 Social features:
 
@@ -47,9 +50,9 @@ Social features:
 
 UX/UI:
 
-- [] UI with left side panel as navbar
+- [x] UI with left side panel as navbar
+- [x] Responsive desing
 - [] Be able to sign in multiple users
-- [] Responsive desing
 
 Browser extension:
 
