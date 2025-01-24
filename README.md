@@ -24,10 +24,11 @@ This project starts with the goal to facilitate easy access to a library of AI p
 
 Basic features:
 
-- [] Store your AI prompts
+- [] Be able to create AI prompts
 - [] Be able to add GROUPS of prompts
-- [] Search for AI prompts
-- [] Filter AI prompts by category
+- [] Be able to search within the library, groups and community for AI prompts
+- [] Store your AI prompts
+- [] Side Filter AI prompts by category
 
 - [] Version control for your AI prompts (in an easy way for normal people and need to be a developer to do it)
 

@@ -66,6 +66,14 @@ export default function LibraryPage() {
     localStorage.setItem("groups", JSON.stringify(updatedGroups))
   }
 
+  const handleUpdatePrompt = (updatedPrompt: Prompt) => {
+    const updatedPrompts = prompts.map((p) =>
+      p.id === updatedPrompt.id ? updatedPrompt : p
+    )
+    setPrompts(updatedPrompts)
+    localStorage.setItem("prompts", JSON.stringify(updatedPrompts))
+  }
+
   const filteredPrompts = searchTerm
     ? prompts.filter((prompt) =>
         prompt.title.toLowerCase().includes(searchTerm.toLowerCase())
@@ -168,16 +176,28 @@ export default function LibraryPage() {
           </div>
 
           <TabsContent value="recent" className="mt-4">
-            <PromptList prompts={filteredPrompts} />
+            <PromptList
+              prompts={filteredPrompts}
+              onUpdatePrompt={handleUpdatePrompt}
+            />
           </TabsContent>
           <TabsContent value="favorites" className="mt-4">
-            <PromptList prompts={filteredPrompts.filter((p) => p.isFavorite)} />
+            <PromptList
+              prompts={filteredPrompts.filter((p) => p.isFavorite)}
+              onUpdatePrompt={handleUpdatePrompt}
+            />
           </TabsContent>
           <TabsContent value="owned" className="mt-4">
-            <PromptList prompts={filteredPrompts} />
+            <PromptList
+              prompts={filteredPrompts}
+              onUpdatePrompt={handleUpdatePrompt}
+            />
           </TabsContent>
           <TabsContent value="templates" className="mt-4">
-            <PromptList prompts={filteredPrompts} />
+            <PromptList
+              prompts={filteredPrompts}
+              onUpdatePrompt={handleUpdatePrompt}
+            />
           </TabsContent>
         </Tabs>
       </div>
