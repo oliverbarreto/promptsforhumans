@@ -10,6 +10,8 @@ import { useDebounce } from "@/hooks/use-debounce"
 import type { Prompt } from "@/types/prompt"
 import { Input } from "@/components/ui/input"
 import { mockPrompts } from "@/data/mock-data"
+import { SlidersHorizontal, X } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 function PromptGrid({
   prompts,
@@ -36,8 +38,15 @@ export default function ExplorePage() {
   const [filteredPrompts, setFilteredPrompts] = useState<Prompt[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [currentFilter, setCurrentFilter] = useState("all")
-  const [filters, setFilters] = useState<Record<string, string[]>>({})
+  const [filters, setFilters] = useState<Record<string, string[]>>({
+    useCases: [],
+    type: [],
+    language: [],
+    models: [],
+    tools: []
+  })
   const [error, setError] = useState<string | null>(null)
+  const [isFilterVisible, setIsFilterVisible] = useState(true)
 
   const debouncedSearchTerm = useDebounce(searchTerm, 300)
 
@@ -151,9 +160,12 @@ export default function ExplorePage() {
     setCurrentFilter(filter)
   }
 
-  const handleSidebarFilterChange = (newFilters: Record<string, string[]>) => {
-    setFilters(newFilters)
-  }
+  const handleSidebarFilterChange = useCallback(
+    (newFilters: Record<string, string[]>) => {
+      setFilters(newFilters)
+    },
+    []
+  )
 
   const handleUpdatePrompt = (updatedPrompt: Prompt) => {
     const updatedPrompts = prompts.map((p) =>
@@ -180,14 +192,36 @@ export default function ExplorePage() {
     }
   }, [])
 
+  const handleClearFilters = () => {
+    setFilters({
+      useCases: [],
+      type: [],
+      language: [],
+      models: [],
+      tools: []
+    })
+    setCurrentFilter("all")
+  }
+
   return (
     <div className="flex gap-8 items-start">
-      <div className="flex-grow space-y-8">
+      <div className="flex-1 max-w-[calc(100%-320px)] space-y-8">
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold">Explore Prompts</h1>
-          <Link href="/create">
-            <Button>Create Prompt</Button>
-          </Link>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setIsFilterVisible(!isFilterVisible)}
+              className="md:hidden"
+              title="Toggle filters"
+            >
+              <SlidersHorizontal className="h-4 w-4" />
+            </Button>
+            <Link href="/create">
+              <Button>Create Prompt</Button>
+            </Link>
+          </div>
         </div>
         {prompts.length === 0 ? (
           <div className="text-center py-12">
@@ -220,10 +254,50 @@ export default function ExplorePage() {
           </>
         )}
       </div>
-      <FiltersSidebar
-        prompts={prompts}
-        onFilterChange={handleSidebarFilterChange}
-      />
+      <div
+        className={cn(
+          "fixed md:relative inset-y-0 right-0 z-50 w-[300px] bg-background border-l md:border-none transition-transform duration-200 ease-in-out",
+          "md:translate-x-0 md:w-[300px] md:sticky md:top-8",
+          isFilterVisible ? "translate-x-0" : "translate-x-full"
+        )}
+      >
+        <div className="relative h-full md:h-auto">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute right-4 top-4 md:hidden"
+            onClick={() => setIsFilterVisible(false)}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+
+          <div className="p-4 md:p-0">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-semibold">Filters</h2>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleClearFilters}
+                className="text-sm"
+              >
+                Clear all
+              </Button>
+            </div>
+            <FiltersSidebar
+              prompts={prompts}
+              onFilterChange={handleSidebarFilterChange}
+              selectedFilters={filters}
+            />
+          </div>
+        </div>
+      </div>
+
+      {isFilterVisible && (
+        <div
+          className="fixed inset-0 bg-background/80 backdrop-blur-sm md:hidden"
+          onClick={() => setIsFilterVisible(false)}
+        />
+      )}
     </div>
   )
 }

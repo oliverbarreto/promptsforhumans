@@ -3,7 +3,12 @@
 import { useState, useEffect } from "react"
 import { Check } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger
+} from "@/components/ui/accordion"
 import { Checkbox } from "@/components/ui/checkbox"
 import type { Prompt, PromptVersion } from "@/types/prompt"
 
@@ -20,10 +25,29 @@ interface FilterGroupProps {
   onChange: (values: string[]) => void
 }
 
-function FilterGroup({ title, options, selectedValues, onChange }: FilterGroupProps) {
+function FilterGroup({
+  title,
+  options,
+  selectedValues,
+  onChange
+}: FilterGroupProps) {
+  const handleCheckedChange = (
+    checked: boolean | "indeterminate",
+    value: string
+  ) => {
+    if (typeof checked === "boolean") {
+      const newSelectedValues = checked
+        ? [...selectedValues, value]
+        : selectedValues.filter((v) => v !== value)
+      onChange(newSelectedValues)
+    }
+  }
+
   return (
     <AccordionItem value={title}>
-      <AccordionTrigger className="text-sm hover:no-underline">{title}</AccordionTrigger>
+      <AccordionTrigger className="text-sm hover:no-underline">
+        {title}
+      </AccordionTrigger>
       <AccordionContent>
         <div className="space-y-2">
           {options.map((option) => (
@@ -33,17 +57,17 @@ function FilterGroup({ title, options, selectedValues, onChange }: FilterGroupPr
             >
               <div className="flex items-center space-x-2">
                 <Checkbox
+                  id={`${title}-${option.value}`}
                   checked={selectedValues.includes(option.value)}
-                  onCheckedChange={(checked) => {
-                    const newSelectedValues = checked
-                      ? [...selectedValues, option.value]
-                      : selectedValues.filter((value) => value !== option.value)
-                    onChange(newSelectedValues)
-                  }}
+                  onCheckedChange={(checked) =>
+                    handleCheckedChange(checked, option.value)
+                  }
                 />
                 <span>{option.label}</span>
               </div>
-              <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded-md">{option.count}</span>
+              <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded-md">
+                {option.count}
+              </span>
             </label>
           ))}
         </div>
@@ -55,25 +79,24 @@ function FilterGroup({ title, options, selectedValues, onChange }: FilterGroupPr
 interface FiltersSidebarProps {
   prompts: Prompt[]
   onFilterChange: (filters: Record<string, string[]>) => void
+  selectedFilters: Record<string, string[]>
 }
 
-export function FiltersSidebar({ prompts, onFilterChange }: FiltersSidebarProps) {
-  const [filters, setFilters] = useState({
-    useCases: [],
-    type: [],
-    language: [],
-    models: [],
-    tools: [],
-  })
-
+export function FiltersSidebar({
+  prompts,
+  onFilterChange,
+  selectedFilters
+}: FiltersSidebarProps) {
   const getUniqueValuesWithCount = (key: string): FilterOption[] => {
     const valueCount = new Map<string, number>()
 
     prompts.forEach((prompt) => {
       if (key === "useCases" || key === "models" || key === "tools") {
-        prompt.versions[0][key as keyof PromptVersion].forEach((value: string) => {
-          valueCount.set(value, (valueCount.get(value) || 0) + 1)
-        })
+        prompt.versions[0][key as keyof PromptVersion].forEach(
+          (value: string) => {
+            valueCount.set(value, (valueCount.get(value) || 0) + 1)
+          }
+        )
       } else if (Array.isArray(prompt[key as keyof Prompt])) {
         prompt[key as keyof Prompt].forEach((value: string) => {
           valueCount.set(value, (valueCount.get(value) || 0) + 1)
@@ -88,7 +111,7 @@ export function FiltersSidebar({ prompts, onFilterChange }: FiltersSidebarProps)
       .map(([value, count]) => ({
         value,
         label: value,
-        count,
+        count
       }))
       .sort((a, b) => b.count - a.count)
   }
@@ -99,53 +122,48 @@ export function FiltersSidebar({ prompts, onFilterChange }: FiltersSidebarProps)
   const modelOptions = getUniqueValuesWithCount("models")
   const toolOptions = getUniqueValuesWithCount("tools")
 
-  useEffect(() => {
-    onFilterChange(filters)
-  }, [filters, onFilterChange])
-
   const handleFilterChange = (filterName: string) => (values: string[]) => {
-    setFilters((prevFilters) => ({
-      ...prevFilters,
-      [filterName]: values,
-    }))
+    onFilterChange({
+      ...selectedFilters,
+      [filterName]: values
+    })
   }
 
   return (
-    <div className="w-72 space-y-4">
-      <h2 className="font-semibold text-lg">Filters</h2>
+    <div className="w-full rounded-lg border bg-card p-4">
+      <h2 className="font-semibold mb-4">Filters</h2>
       <Accordion type="multiple" className="w-full">
         <FilterGroup
           title="Use Cases"
           options={useCaseOptions}
-          selectedValues={filters.useCases}
+          selectedValues={selectedFilters.useCases || []}
           onChange={handleFilterChange("useCases")}
         />
         <FilterGroup
           title="Type"
           options={typeOptions}
-          selectedValues={filters.type}
+          selectedValues={selectedFilters.type || []}
           onChange={handleFilterChange("type")}
         />
         <FilterGroup
           title="Language"
           options={languageOptions}
-          selectedValues={filters.language}
+          selectedValues={selectedFilters.language || []}
           onChange={handleFilterChange("language")}
         />
         <FilterGroup
           title="Models"
           options={modelOptions}
-          selectedValues={filters.models}
+          selectedValues={selectedFilters.models || []}
           onChange={handleFilterChange("models")}
         />
         <FilterGroup
           title="Tools"
           options={toolOptions}
-          selectedValues={filters.tools}
+          selectedValues={selectedFilters.tools || []}
           onChange={handleFilterChange("tools")}
         />
       </Accordion>
     </div>
   )
 }
-
