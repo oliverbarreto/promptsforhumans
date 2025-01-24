@@ -1,0 +1,69 @@
+{
+  "prompts": [
+    {
+      "id": 1,
+      "title": "Creative Story Starter",
+      "author": {
+        "name": "Alice Wonderland",
+        "avatar": "/placeholder.svg?height=40&width=40"
+      },
+      "tags": ["creative", "writing", "fantasy"],
+      "likes": 120,
+      "createdAt": "2023-05-15T10:30:00Z",
+      "currentVersion": "1",
+      "versions": [
+        {
+          "id": "1-1",
+          "version": "1",
+          "content": "You are a storyteller in a world where dreams come to life. Describe the most vivid dream that has manifested in reality.",
+          "details": "This prompt is designed to spark creativity and encourage imaginative storytelling. It combines elements of fantasy with the familiar concept of dreams to create a unique narrative starting point.",
+          "useCases": ["Creative Writing", "World Building", "Character Development"],
+          "type": "ChatPromptTemplate",
+          "language": "English",
+          "models": ["GPT-4", "Claude-2", "PaLM-2"],
+          "tools": ["Midjourney", "DALL-E"],
+          "createdAt": "2023-05-15T10:30:00Z"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Code Refactoring Assistant",
+      "author": {
+        "name": "Bob Builder",
+        "avatar": "/placeholder.svg?height=40&width=40"
+      },
+      "tags": ["coding", "refactoring", "best-practices"],
+      "likes": 95,
+      "createdAt": "2023-05-14T14:45:00Z",
+      "currentVersion": "2",
+      "versions": [
+        {
+          "id": "2-1",
+          "version": "1",
+          "content": "Analyze this code snippet and suggest improvements for readability and efficiency: [Insert code snippet here]",
+          "details": "This prompt helps developers improve their code quality by providing specific suggestions for refactoring.",
+          "useCases": ["Code Review", "Learning Best Practices"],
+          "type": "CompletionPromptTemplate",
+          "language": "English",
+          "models": ["GPT-4", "CodeLlama"],
+          "tools": ["GitHub Copilot", "Amazon CodeWhisperer"],
+          "createdAt": "2023-05-14T14:45:00Z"
+        },
+        {
+          "id": "2-2",
+          "version": "2",
+          "content": "As an expert software developer, analyze the following code and provide specific recommendations for improving: 1) Code readability 2) Performance optimization 3) Best practices 4) Potential bugs. [Insert code snippet here]",
+          "details": "Enhanced version with more structured output and comprehensive code analysis categories.",
+          "useCases": ["Code Review", "Learning Best Practices", "Performance Optimization", "Bug Detection"],
+          "type": "CompletionPromptTemplate",
+          "language": "English",
+          "models": ["GPT-4", "CodeLlama", "Claude-2"],
+          "tools": ["GitHub Copilot", "Amazon CodeWhisperer", "SonarQube"],
+          "createdAt": "2023-05-16T09:30:00Z"
+        }
+      ]
+    }
+  ]
+}
+
