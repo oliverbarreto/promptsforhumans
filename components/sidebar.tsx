@@ -31,12 +31,22 @@ import {
 } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle"
 
-const navItems = [
-  { name: "Home", icon: Home, href: "/" },
-  { name: "Explore", icon: Compass, href: "/explore" },
-  { name: "Library", icon: Library, href: "/library" },
-  { name: "Templates", icon: FileText, href: "/templates" },
-  { name: "Workflows", icon: GitBranch, href: "/workflows" }
+const mainNavItems = [
+  {
+    title: "Library",
+    href: "/library",
+    icon: Library
+  },
+  {
+    title: "Templates",
+    href: "/templates",
+    icon: FileText
+  },
+  {
+    title: "Workflows",
+    href: "/workflows",
+    icon: GitBranch
+  }
 ]
 
 const bottomNavItems = [{ name: "Settings", icon: Settings, href: "/settings" }]
@@ -60,15 +70,19 @@ export function Sidebar({ isAuthenticated }: SidebarProps) {
         )}
       >
         <div className="flex items-center justify-between p-4">
-          {!isCollapsed && <h1 className="text-xl font-bold">PromptHub</h1>}
+          {!isCollapsed && (
+            <Link href="/" className="hover:opacity-80 transition-opacity">
+              <h1 className="text-xl font-bold">PromptHub</h1>
+            </Link>
+          )}
           <Button variant="ghost" size="icon" onClick={toggleCollapse}>
             {isCollapsed ? <ChevronRight /> : <ChevronLeft />}
           </Button>
         </div>
         <nav className="flex-1 overflow-y-auto">
           <ul className="space-y-2 p-2">
-            {navItems.map((item) => (
-              <li key={item.name}>
+            {mainNavItems.map((item) => (
+              <li key={item.title}>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Link href={item.href}>
@@ -81,13 +95,13 @@ export function Sidebar({ isAuthenticated }: SidebarProps) {
                       >
                         <item.icon className="h-5 w-5" />
                         {!isCollapsed && (
-                          <span className="ml-2">{item.name}</span>
+                          <span className="ml-2">{item.title}</span>
                         )}
                       </Button>
                     </Link>
                   </TooltipTrigger>
                   {isCollapsed && (
-                    <TooltipContent side="right">{item.name}</TooltipContent>
+                    <TooltipContent side="right">{item.title}</TooltipContent>
                   )}
                 </Tooltip>
               </li>
