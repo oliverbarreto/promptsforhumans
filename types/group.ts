@@ -8,4 +8,5 @@ export interface Group {
   updatedAt: string
   authorId: string
   visibility: "public" | "private"
+  prompts: string[]
 }

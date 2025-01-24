@@ -9,7 +9,13 @@ import { Label } from "@/components/ui/label"
 import { AlertCircle, CheckCircle2, Plus } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select"
 import { CreateGroupDialog } from "@/components/create-group-dialog"
 import type { Prompt } from "@/types/prompt"
 import type { Group } from "@/types/group"
@@ -25,7 +31,7 @@ export default function CreatePromptPage() {
     language: "",
     model: "",
     visibility: "public",
-    groupId: undefined,
+    groupId: undefined
   })
   const [groups, setGroups] = useState<Group[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -41,7 +47,9 @@ export default function CreatePromptPage() {
     }
   }, [])
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target
     setPrompt((prev) => ({ ...prev, [name]: value }))
   }
@@ -51,7 +59,10 @@ export default function CreatePromptPage() {
   }
 
   const handleGroupChange = (value: string) => {
-    setPrompt((prev) => ({ ...prev, groupId: value ? Number(value) : undefined }))
+    setPrompt((prev) => ({
+      ...prev,
+      groupId: value || undefined
+    }))
   }
 
   const handleCreateGroup = (newGroup: Group) => {
@@ -66,60 +77,88 @@ export default function CreatePromptPage() {
     e.preventDefault()
     setIsSubmitting(true)
     setError("")
-    setSuccess(false)
+
+    // Validate required fields
+    if (!prompt.title || !prompt.content) {
+      setError("Title and content are required")
+      setIsSubmitting(false)
+      return
+    }
 
     try {
-      const storedPrompts = localStorage.getItem("prompts")
-      const existingPrompts: Prompt[] = storedPrompts ? JSON.parse(storedPrompts) : []
+      // Generate a unique ID for the new prompt
+      const promptId = String(Date.now())
 
+      // Create the new prompt object
       const newPrompt: Prompt = {
-        ...(prompt as Prompt),
-        id: existingPrompts.length + 1,
-        author: {
-          name: "Current User",
-          avatar: "/placeholder.svg?height=40&width=40",
-        },
-        likes: 0,
+        id: promptId,
+        title: prompt.title,
+        content: prompt.content,
+        tags: prompt.tags || [],
+        details: prompt.details || "",
+        useCases: prompt.useCases || [],
+        type: prompt.type || "general",
+        language: prompt.language || "en",
+        model: prompt.model || "gpt-4",
+        visibility: prompt.visibility || "public",
+        groupId: prompt.groupId, // This will be undefined if no group is selected
         createdAt: new Date().toISOString(),
-        tags:
-          prompt.tags
-            ?.join(",")
-            .split(",")
-            .map((tag) => tag.trim()) || [],
-        useCases:
-          prompt.useCases
-            ?.join(",")
-            .split(",")
-            .map((useCase) => useCase.trim()) || [],
+        updatedAt: new Date().toISOString(),
         currentVersion: "1",
         versions: [
           {
-            id: `${existingPrompts.length + 1}-1`,
+            id: `${promptId}-1`,
             version: "1",
-            content: prompt.content || "",
+            content: prompt.content,
             details: prompt.details || "",
             useCases: prompt.useCases || [],
-            type: prompt.type || "",
-            language: prompt.language || "",
-            models: [prompt.model || ""],
+            type: prompt.type || "general",
+            language: prompt.language || "en",
+            models: [prompt.model || "gpt-4"],
             tools: [],
             createdAt: new Date().toISOString(),
-          },
+            visibility: prompt.visibility || "public"
+          }
         ],
-        isArchived: false,
+        author: {
+          id: "current-user",
+          name: "Current User",
+          avatar: null
+        },
+        likes: 0,
+        views: 0,
         isFavorite: false,
+        isArchived: false
       }
 
+      // Get existing prompts from localStorage
+      const storedPrompts = localStorage.getItem("prompts")
+      const existingPrompts: Prompt[] = storedPrompts
+        ? JSON.parse(storedPrompts)
+        : []
+
+      // Add new prompt to the array
       const updatedPrompts = [...existingPrompts, newPrompt]
       localStorage.setItem("prompts", JSON.stringify(updatedPrompts))
 
-      // Update group prompt count if a group was selected
+      // If a group was selected, update the group data
       if (prompt.groupId) {
-        const updatedGroups = groups.map((group) =>
-          group.id === prompt.groupId ? { ...group, promptCount: group.promptCount + 1 } : group,
-        )
-        setGroups(updatedGroups)
-        localStorage.setItem("groups", JSON.stringify(updatedGroups))
+        const storedGroups = localStorage.getItem("groups")
+        if (storedGroups) {
+          const groups: Group[] = JSON.parse(storedGroups)
+          const updatedGroups = groups.map((group) => {
+            if (group.id === prompt.groupId) {
+              return {
+                ...group,
+                promptCount: (group.promptCount || 0) + 1,
+                prompts: [...(group.prompts || []), promptId],
+                updatedAt: new Date().toISOString()
+              }
+            }
+            return group
+          })
+          localStorage.setItem("groups", JSON.stringify(updatedGroups))
+        }
       }
 
       setSuccess(true)
@@ -127,6 +166,7 @@ export default function CreatePromptPage() {
         router.push("/library")
       }, 2000)
     } catch (err) {
+      console.error("Error creating prompt:", err)
       setError("An error occurred while creating the prompt. Please try again.")
     } finally {
       setIsSubmitting(false)
@@ -174,7 +214,10 @@ export default function CreatePromptPage() {
         <div className="space-y-2">
           <Label htmlFor="group">Group</Label>
           <div className="flex gap-2">
-            <Select value={prompt.groupId?.toString()} onValueChange={handleGroupChange}>
+            <Select
+              value={prompt.groupId?.toString()}
+              onValueChange={handleGroupChange}
+            >
               <SelectTrigger className="flex-1">
                 <SelectValue placeholder="Select a group" />
               </SelectTrigger>
@@ -186,7 +229,11 @@ export default function CreatePromptPage() {
                 ))}
               </SelectContent>
             </Select>
-            <Button type="button" variant="outline" onClick={() => setIsCreateGroupOpen(true)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsCreateGroupOpen(true)}
+            >
               <Plus className="h-4 w-4 mr-2" />
               New Group
             </Button>
@@ -199,7 +246,10 @@ export default function CreatePromptPage() {
             name="useCases"
             value={prompt.useCases?.join(", ")}
             onChange={(e) =>
-              setPrompt((prev) => ({ ...prev, useCases: e.target.value.split(",").map((s) => s.trim()) }))
+              setPrompt((prev) => ({
+                ...prev,
+                useCases: e.target.value.split(",").map((s) => s.trim())
+              }))
             }
             placeholder="e.g., Summarization, Expanding, Creative Writing"
           />
@@ -226,7 +276,13 @@ export default function CreatePromptPage() {
         </div>
         <div className="space-y-2">
           <Label htmlFor="model">Model</Label>
-          <Input id="model" name="model" value={prompt.model} onChange={handleInputChange} placeholder="e.g., GPT-4" />
+          <Input
+            id="model"
+            name="model"
+            value={prompt.model}
+            onChange={handleInputChange}
+            placeholder="e.g., GPT-4"
+          />
         </div>
         <div className="space-y-2">
           <Label htmlFor="tags">Tags (comma-separated)</Label>
@@ -234,7 +290,12 @@ export default function CreatePromptPage() {
             id="tags"
             name="tags"
             value={prompt.tags?.join(", ")}
-            onChange={(e) => setPrompt((prev) => ({ ...prev, tags: e.target.value.split(",").map((s) => s.trim()) }))}
+            onChange={(e) =>
+              setPrompt((prev) => ({
+                ...prev,
+                tags: e.target.value.split(",").map((s) => s.trim())
+              }))
+            }
             placeholder="e.g., creative, coding, marketing"
           />
         </div>
@@ -242,7 +303,9 @@ export default function CreatePromptPage() {
           <Label>Visibility</Label>
           <RadioGroup
             defaultValue={prompt.visibility}
-            onValueChange={(value) => handleVisibilityChange(value as "public" | "private")}
+            onValueChange={(value) =>
+              handleVisibilityChange(value as "public" | "private")
+            }
           >
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="public" id="public" />
@@ -269,11 +332,16 @@ export default function CreatePromptPage() {
         <Alert className="mt-4">
           <CheckCircle2 className="h-4 w-4" />
           <AlertTitle>Success</AlertTitle>
-          <AlertDescription>Your prompt has been created successfully! Redirecting to library...</AlertDescription>
+          <AlertDescription>
+            Your prompt has been created successfully! Redirecting to library...
+          </AlertDescription>
         </Alert>
       )}
-      <CreateGroupDialog open={isCreateGroupOpen} onOpenChange={setIsCreateGroupOpen} onSubmit={handleCreateGroup} />
+      <CreateGroupDialog
+        open={isCreateGroupOpen}
+        onOpenChange={setIsCreateGroupOpen}
+        onSubmit={handleCreateGroup}
+      />
     </div>
   )
 }
-

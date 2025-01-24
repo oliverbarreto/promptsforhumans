@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { Heart, MessageCircle, Globe, Lock } from "lucide-react"
 import { PromptActions } from "./prompt-actions"
+import { UserAvatar } from "./user-avatar"
 import type { Prompt } from "@/types/prompt"
 
 interface PromptCardProps {
@@ -35,12 +36,11 @@ export function PromptCard({ prompt, onUpdatePrompt }: PromptCardProps) {
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <Image
-              src={prompt.author.avatar || "/placeholder.svg"}
+            <UserAvatar
+              src={prompt.author.avatar}
               alt={prompt.author.name}
               width={40}
               height={40}
-              className="rounded-full"
             />
             <div>
               <div className="flex items-center gap-2">

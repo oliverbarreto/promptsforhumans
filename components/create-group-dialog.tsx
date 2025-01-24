@@ -8,7 +8,7 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
+  DialogTitle
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -22,7 +22,11 @@ interface CreateGroupDialogProps {
   onSubmit: (group: Group) => void
 }
 
-export function CreateGroupDialog({ open, onOpenChange, onSubmit }: CreateGroupDialogProps) {
+export function CreateGroupDialog({
+  open,
+  onOpenChange,
+  onSubmit
+}: CreateGroupDialogProps) {
   const [name, setName] = useState("")
   const [description, setDescription] = useState("")
   const [visibility, setVisibility] = useState<"public" | "private">("public")
@@ -31,7 +35,7 @@ export function CreateGroupDialog({ open, onOpenChange, onSubmit }: CreateGroupD
     e.preventDefault()
 
     const newGroup: Group = {
-      id: Date.now(),
+      id: String(Date.now()),
       name,
       description,
       createdAt: new Date().toISOString(),
@@ -40,6 +44,7 @@ export function CreateGroupDialog({ open, onOpenChange, onSubmit }: CreateGroupD
       promptCount: 0,
       authorId: "current-user", // This would come from auth
       visibility,
+      prompts: [] // Initialize empty prompts array
     }
 
     onSubmit(newGroup)
@@ -54,14 +59,20 @@ export function CreateGroupDialog({ open, onOpenChange, onSubmit }: CreateGroupD
         <DialogHeader>
           <DialogTitle>Create new group</DialogTitle>
           <DialogDescription>
-            Create a new group to organize your prompts. Groups can be public or private.
+            Create a new group to organize your prompts. Groups can be public or
+            private.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label htmlFor="name">Name</Label>
-              <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Enter group name" />
+              <Input
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Enter group name"
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="description">Description (optional)</Label>
@@ -74,7 +85,12 @@ export function CreateGroupDialog({ open, onOpenChange, onSubmit }: CreateGroupD
             </div>
             <div className="space-y-2">
               <Label>Visibility</Label>
-              <RadioGroup value={visibility} onValueChange={(value: "public" | "private") => setVisibility(value)}>
+              <RadioGroup
+                value={visibility}
+                onValueChange={(value: "public" | "private") =>
+                  setVisibility(value)
+                }
+              >
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="public" id="public" />
                   <Label htmlFor="public">Public</Label>
@@ -94,4 +110,3 @@ export function CreateGroupDialog({ open, onOpenChange, onSubmit }: CreateGroupD
     </Dialog>
   )
 }
-

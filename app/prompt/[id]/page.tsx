@@ -2,68 +2,125 @@
 
 import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
-import Image from "next/image"
 import Link from "next/link"
-import { format } from "date-fns"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle
+} from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Heart, MessageCircle, ArrowLeft, Edit, Plus } from "lucide-react"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select"
+import {
+  Heart,
+  MessageCircle,
+  ArrowLeft,
+  Edit,
+  Plus,
+  Globe,
+  Lock
+} from "lucide-react"
 import { VersionSelector } from "@/components/version-selector"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { PromptActions } from "@/components/prompt-actions"
+import { UserAvatar } from "@/components/user-avatar"
 import type { Prompt, PromptVersion } from "@/types/prompt"
+import type { Group } from "@/types/group"
+import { formatDate } from "@/lib/utils"
+import { cn } from "@/lib/utils"
+import { mockPrompts } from "@/data/mock-data"
+
+interface EditedPromptData extends Partial<PromptVersion> {
+  groupId?: string
+}
 
 export default function PromptDetailPage() {
   const { id } = useParams() as { id: string }
   const router = useRouter()
   const [prompt, setPrompt] = useState<Prompt | null>(null)
+  const [groups, setGroups] = useState<Group[]>([])
   const [selectedVersion, setSelectedVersion] = useState<string | null>(null)
   const [isEditing, setIsEditing] = useState(false)
-  const [editedVersion, setEditedVersion] = useState<Partial<PromptVersion>>({})
+  const [editedVersion, setEditedVersion] = useState<EditedPromptData>({})
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isEditingName, setIsEditingName] = useState(false)
   const [editedName, setEditedName] = useState(prompt?.title || "")
 
   useEffect(() => {
-    const fetchPrompt = () => {
+    const fetchData = () => {
       setIsLoading(true)
       setError(null)
-      if (!id) {
-        setError("Invalid prompt ID")
-        setIsLoading(false)
-        return
-      }
+
       try {
+        // Fetch groups
+        const storedGroups = localStorage.getItem("groups")
+        if (storedGroups) {
+          const parsedGroups = JSON.parse(storedGroups)
+          setGroups(parsedGroups)
+        }
+
+        // Fetch prompt
         const storedPrompts = localStorage.getItem("prompts")
-        if (storedPrompts) {
-          const prompts: Prompt[] = JSON.parse(storedPrompts)
-          const foundPrompt = prompts.find((p) => p.id === Number(id))
+        if (!storedPrompts) {
+          // If no prompts in localStorage, use mock data
+          const foundPrompt = mockPrompts.find((p) => p.id === id)
           if (foundPrompt) {
             setPrompt(foundPrompt)
             setSelectedVersion(foundPrompt.currentVersion)
+            // Store mock data in localStorage
+            localStorage.setItem("prompts", JSON.stringify(mockPrompts))
           } else {
             setError("Prompt not found")
           }
         } else {
-          setError("No prompts found")
+          // If prompts exist in localStorage, use them
+          const prompts: Prompt[] = JSON.parse(storedPrompts)
+          const foundPrompt = prompts.find((p) => p.id === id)
+          if (foundPrompt) {
+            setPrompt(foundPrompt)
+            setSelectedVersion(foundPrompt.currentVersion)
+          } else {
+            // If not found in localStorage, check mock data
+            const mockPrompt = mockPrompts.find((p) => p.id === id)
+            if (mockPrompt) {
+              setPrompt(mockPrompt)
+              setSelectedVersion(mockPrompt.currentVersion)
+              // Update localStorage with mock data
+              localStorage.setItem(
+                "prompts",
+                JSON.stringify([...prompts, mockPrompt])
+              )
+            } else {
+              setError("Prompt not found")
+            }
+          }
         }
       } catch (error) {
-        console.error("Error fetching prompt:", error)
-        setError("Failed to load prompt")
+        console.error("Error fetching data:", error)
+        setError("Failed to load data")
       } finally {
         setIsLoading(false)
       }
     }
 
-    fetchPrompt()
+    fetchData()
   }, [id])
 
-  const currentVersionData = prompt?.versions?.find((v) => v.version === selectedVersion) || null
+  const currentVersionData =
+    prompt?.versions?.find((v) => v.version === selectedVersion) || null
 
   const handleVersionSelect = (version: string) => {
     setSelectedVersion(version)
@@ -85,13 +142,13 @@ export default function PromptDetailPage() {
       models: [...currentVersionData.models],
       tools: [...currentVersionData.tools],
       createdAt: new Date().toISOString(),
-      visibility: currentVersionData.visibility,
+      visibility: currentVersionData.visibility
     }
 
     const updatedPrompt = {
       ...prompt,
       currentVersion: newVersionNumber,
-      versions: [...(prompt.versions || []), newVersion],
+      versions: [...(prompt.versions || []), newVersion]
     }
 
     updatePromptInStorage(updatedPrompt)
@@ -112,13 +169,43 @@ export default function PromptDetailPage() {
 
     const updatedVersion: PromptVersion = {
       ...currentVersionData,
-      ...editedVersion,
+      ...editedVersion
     }
 
     const updatedPrompt = {
       ...prompt,
       visibility: editedVersion.visibility || prompt.visibility,
-      versions: prompt.versions.map((v) => (v.version === selectedVersion ? updatedVersion : v)),
+      versions: prompt.versions.map((v) =>
+        v.version === selectedVersion ? updatedVersion : v
+      )
+    }
+
+    // If group has changed, update both old and new group's prompt lists
+    if (editedVersion.groupId && editedVersion.groupId !== prompt.groupId) {
+      const storedGroups = localStorage.getItem("groups")
+      if (storedGroups) {
+        const groups: Group[] = JSON.parse(storedGroups)
+        const updatedGroups = groups.map((group) => {
+          if (group.id === prompt.groupId) {
+            // Remove prompt from old group
+            return {
+              ...group,
+              promptCount: Math.max(0, (group.promptCount || 0) - 1),
+              prompts: (group.prompts || []).filter((p) => p !== prompt.id)
+            }
+          }
+          if (group.id === editedVersion.groupId) {
+            // Add prompt to new group
+            return {
+              ...group,
+              promptCount: (group.promptCount || 0) + 1,
+              prompts: [...(group.prompts || []), prompt.id]
+            }
+          }
+          return group
+        })
+        localStorage.setItem("groups", JSON.stringify(updatedGroups))
+      }
     }
 
     updatePromptInStorage(updatedPrompt)
@@ -132,8 +219,10 @@ export default function PromptDetailPage() {
   }
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | { target: { name: string; value: string } },
-    field: keyof PromptVersion | "visibility",
+    e:
+      | React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+      | { target: { name: string; value: string } },
+    field: keyof PromptVersion | "groupId" | "visibility"
   ) => {
     const { name, value } = e.target
     setEditedVersion((prev) => ({
@@ -141,7 +230,7 @@ export default function PromptDetailPage() {
       [field]:
         field === "models" || field === "tools" || field === "useCases"
           ? value.split(",").map((item) => item.trim())
-          : value,
+          : value
     }))
   }
 
@@ -154,7 +243,7 @@ export default function PromptDetailPage() {
     if (!prompt) return
     const updatedPrompt = {
       ...prompt,
-      title: editedName,
+      title: editedName
     }
     updatePromptInStorage(updatedPrompt)
     setPrompt(updatedPrompt)
@@ -170,7 +259,9 @@ export default function PromptDetailPage() {
     const storedPrompts = localStorage.getItem("prompts")
     if (storedPrompts) {
       const prompts: Prompt[] = JSON.parse(storedPrompts)
-      const updatedPrompts = prompts.map((p) => (p.id === updatedPrompt.id ? updatedPrompt : p))
+      const updatedPrompts = prompts.map((p) =>
+        p.id === updatedPrompt.id ? updatedPrompt : p
+      )
       localStorage.setItem("prompts", JSON.stringify(updatedPrompts))
     }
   }
@@ -214,7 +305,11 @@ export default function PromptDetailPage() {
         <div className="md:col-span-1 space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="font-semibold">Versions</h3>
-            <Button size="sm" variant="outline" onClick={handleCreateNewVersion}>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleCreateNewVersion}
+            >
               <Plus className="h-4 w-4" />
             </Button>
           </div>
@@ -230,18 +325,23 @@ export default function PromptDetailPage() {
             <CardHeader>
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center space-x-4">
-                  <Image
-                    src={prompt.author.avatar || "/placeholder.svg"}
+                  <UserAvatar
+                    src={prompt.author.avatar}
                     alt={prompt.author.name}
                     width={40}
                     height={40}
-                    className="rounded-full"
                   />
                   <div>
-                    <p className="font-semibold">{prompt.author.name}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-semibold">{prompt.author.name}</p>
+                      {prompt.visibility === "public" ? (
+                        <Globe className="h-4 w-4 text-muted-foreground" />
+                      ) : (
+                        <Lock className="h-4 w-4 text-muted-foreground" />
+                      )}
+                    </div>
                     <p className="text-sm text-muted-foreground">
-                      Version {currentVersionData.version} •{" "}
-                      {format(new Date(currentVersionData.createdAt), "MMM d, yyyy")}
+                      {new Date(prompt.createdAt).toLocaleDateString()}
                     </p>
                   </div>
                 </div>
@@ -262,7 +362,11 @@ export default function PromptDetailPage() {
                   <Button onClick={handleSaveName} size="sm">
                     Save
                   </Button>
-                  <Button onClick={handleCancelEditName} size="sm" variant="outline">
+                  <Button
+                    onClick={handleCancelEditName}
+                    size="sm"
+                    variant="outline"
+                  >
                     Cancel
                   </Button>
                 </div>
@@ -281,9 +385,15 @@ export default function PromptDetailPage() {
                   <div className="space-y-2 mb-4">
                     <Label>Visibility</Label>
                     <RadioGroup
-                      value={editedVersion.visibility || currentVersionData.visibility}
+                      value={
+                        editedVersion.visibility ||
+                        currentVersionData.visibility
+                      }
                       onValueChange={(value) =>
-                        handleInputChange({ target: { name: "visibility", value } } as any, "visibility")
+                        handleInputChange(
+                          { target: { name: "visibility", value } } as any,
+                          "visibility"
+                        )
                       }
                     >
                       <div className="flex items-center space-x-2">
@@ -296,11 +406,42 @@ export default function PromptDetailPage() {
                       </div>
                     </RadioGroup>
                   </div>
+                  <div className="space-y-2">
+                    <Label>Group</Label>
+                    <Select
+                      value={editedVersion.groupId || prompt?.groupId || "none"}
+                      onValueChange={(value) =>
+                        handleInputChange(
+                          {
+                            target: {
+                              name: "groupId",
+                              value: value === "none" ? undefined : value
+                            }
+                          } as any,
+                          "groupId"
+                        )
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a group" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">No group</SelectItem>
+                        {groups.map((group) => (
+                          <SelectItem key={group.id} value={group.id}>
+                            {group.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                   <div>
                     <Label htmlFor="content">Content</Label>
                     <Textarea
                       id="content"
-                      value={editedVersion.content || currentVersionData.content}
+                      value={
+                        editedVersion.content || currentVersionData.content
+                      }
                       onChange={(e) => handleInputChange(e, "content")}
                       rows={6}
                     />
@@ -309,16 +450,23 @@ export default function PromptDetailPage() {
                     <Label htmlFor="details">Details</Label>
                     <Textarea
                       id="details"
-                      value={editedVersion.details || currentVersionData.details}
+                      value={
+                        editedVersion.details || currentVersionData.details
+                      }
                       onChange={(e) => handleInputChange(e, "details")}
                       rows={4}
                     />
                   </div>
                   <div>
-                    <Label htmlFor="useCases">Use Cases (comma-separated)</Label>
+                    <Label htmlFor="useCases">
+                      Use Cases (comma-separated)
+                    </Label>
                     <Input
                       id="useCases"
-                      value={editedVersion.useCases?.join(", ") || currentVersionData.useCases.join(", ")}
+                      value={
+                        editedVersion.useCases?.join(", ") ||
+                        currentVersionData.useCases.join(", ")
+                      }
                       onChange={(e) => handleInputChange(e, "useCases")}
                     />
                   </div>
@@ -334,7 +482,9 @@ export default function PromptDetailPage() {
                     <Label htmlFor="language">Language</Label>
                     <Input
                       id="language"
-                      value={editedVersion.language || currentVersionData.language}
+                      value={
+                        editedVersion.language || currentVersionData.language
+                      }
                       onChange={(e) => handleInputChange(e, "language")}
                     />
                   </div>
@@ -342,7 +492,10 @@ export default function PromptDetailPage() {
                     <Label htmlFor="models">Models (comma-separated)</Label>
                     <Input
                       id="models"
-                      value={editedVersion.models?.join(", ") || currentVersionData.models.join(", ")}
+                      value={
+                        editedVersion.models?.join(", ") ||
+                        currentVersionData.models.join(", ")
+                      }
                       onChange={(e) => handleInputChange(e, "models")}
                     />
                   </div>
@@ -350,7 +503,10 @@ export default function PromptDetailPage() {
                     <Label htmlFor="tools">Tools (comma-separated)</Label>
                     <Input
                       id="tools"
-                      value={editedVersion.tools?.join(", ") || currentVersionData.tools.join(", ")}
+                      value={
+                        editedVersion.tools?.join(", ") ||
+                        currentVersionData.tools.join(", ")
+                      }
                       onChange={(e) => handleInputChange(e, "tools")}
                     />
                   </div>
@@ -370,7 +526,9 @@ export default function PromptDetailPage() {
                   </TabsList>
                   <TabsContent value="content" className="space-y-4">
                     <div className="prose dark:prose-invert max-w-none">
-                      <p className="whitespace-pre-wrap">{currentVersionData.content}</p>
+                      <p className="whitespace-pre-wrap">
+                        {currentVersionData.content}
+                      </p>
                     </div>
                   </TabsContent>
                   <TabsContent value="details" className="space-y-4">
@@ -443,4 +601,3 @@ export default function PromptDetailPage() {
     </div>
   )
 }
-

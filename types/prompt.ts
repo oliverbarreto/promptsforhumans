@@ -9,29 +9,36 @@ export interface PromptVersion {
   models: string[]
   tools: string[]
   createdAt: string
+  visibility: "public" | "private"
 }
 
 export interface Author {
   id: string
   name: string
-  avatar?: string
+  avatar?: string | null
 }
 
 export interface Prompt {
   id: string
   title: string
-  description: string
+  description?: string
   content: string
-  category: string
+  details?: string
+  category?: string
   tags: string[]
+  useCases: string[]
+  type?: string
+  language?: string
+  model?: string
   author: Author
   createdAt: string
-  updatedAt: string
+  updatedAt?: string
   likes: number
-  views: number
+  views?: number
   currentVersion: string
   versions: PromptVersion[]
   visibility: "public" | "private"
   isArchived: boolean
   isFavorite: boolean
+  groupId?: string
 }
