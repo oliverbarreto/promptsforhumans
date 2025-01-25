@@ -1,16 +1,25 @@
 "use client"
 
-import { Archive, Globe, Heart, Lock, MoreVertical, Star, Trash } from "lucide-react"
+import {
+  Archive,
+  Globe,
+  Heart,
+  Lock,
+  MoreVertical,
+  Star,
+  ExternalLink
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
 import { toast } from "sonner"
 import type { Prompt } from "@/types/prompt"
+import { useRouter, usePathname } from "next/navigation"
 
 interface PromptActionsProps {
   prompt: Prompt
@@ -18,31 +27,53 @@ interface PromptActionsProps {
 }
 
 export function PromptActions({ prompt, onUpdatePrompt }: PromptActionsProps) {
+  const router = useRouter()
+  const pathname = usePathname()
+
   const handleVisibilityChange = () => {
     const updatedPrompt = {
       ...prompt,
-      visibility: prompt.visibility === "public" ? "private" : "public",
+      visibility:
+        prompt.visibility === "public"
+          ? ("private" as const)
+          : ("public" as const)
     }
     onUpdatePrompt(updatedPrompt)
-    toast.success(`Prompt is now ${updatedPrompt.visibility === "public" ? "public" : "private"}`)
+    toast.success(
+      `Prompt is now ${
+        updatedPrompt.visibility === "public" ? "public" : "private"
+      }`
+    )
   }
 
   const handleArchiveToggle = () => {
     const updatedPrompt = {
       ...prompt,
-      isArchived: !prompt.isArchived,
+      isArchived: !prompt.isArchived
     }
     onUpdatePrompt(updatedPrompt)
-    toast.success(updatedPrompt.isArchived ? "Prompt archived" : "Prompt restored from archive")
+    toast.success(
+      updatedPrompt.isArchived
+        ? "Prompt archived"
+        : "Prompt restored from archive"
+    )
   }
 
   const handleFavoriteToggle = () => {
     const updatedPrompt = {
       ...prompt,
-      isFavorite: !prompt.isFavorite,
+      isFavorite: !prompt.isFavorite
     }
     onUpdatePrompt(updatedPrompt)
-    toast.success(updatedPrompt.isFavorite ? "Added to favorites" : "Removed from favorites")
+    toast.success(
+      updatedPrompt.isFavorite ? "Added to favorites" : "Removed from favorites"
+    )
+  }
+
+  const handleViewPrompt = () => {
+    // Get the current path segment (library, explore, etc)
+    const currentPath = pathname.split("/")[1] || "home"
+    router.push(`/prompt/${prompt.id}?from=${currentPath}`)
   }
 
   return (
@@ -56,7 +87,11 @@ export function PromptActions({ prompt, onUpdatePrompt }: PromptActionsProps) {
         <Star className="h-4 w-4" />
       </Button>
       <Button variant="ghost" size="icon" onClick={handleVisibilityChange}>
-        {prompt.visibility === "public" ? <Globe className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
+        {prompt.visibility === "public" ? (
+          <Globe className="h-4 w-4" />
+        ) : (
+          <Lock className="h-4 w-4" />
+        )}
       </Button>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -65,6 +100,11 @@ export function PromptActions({ prompt, onUpdatePrompt }: PromptActionsProps) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={handleViewPrompt}>
+            <ExternalLink className="mr-2 h-4 w-4" />
+            View Prompt
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleFavoriteToggle}>
             <Heart className="mr-2 h-4 w-4" />
             {prompt.isFavorite ? "Remove from favorites" : "Add to favorites"}
@@ -101,4 +141,3 @@ export function PromptActions({ prompt, onUpdatePrompt }: PromptActionsProps) {
     </div>
   )
 }
-
