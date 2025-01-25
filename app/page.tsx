@@ -8,7 +8,7 @@ import { FiltersSidebar } from "@/components/filters-sidebar"
 import { PromptList } from "@/components/prompt-list"
 import type { Prompt } from "@/types/prompt"
 import { mockPrompts } from "@/data/mock-data"
-import { Filter, FilterX, Plus } from "lucide-react"
+import { Filter, FilterX, Plus, Search } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 export default function HomePage() {
@@ -100,14 +100,17 @@ export default function HomePage() {
         </div>
       </div>
 
-      <div className="mb-6">
-        <Input
-          type="search"
-          placeholder="Search prompts by title or content..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="max-w-md"
-        />
+      <div className="mb-6 flex justify-center">
+        <div className="relative max-w-md w-full">
+          <Input
+            type="search"
+            placeholder="Search prompts by title or content..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-4 pr-10 border-2 focus:border-primary"
+          />
+          <Search className="absolute right-3 top-2.5 h-4 w-4 text-muted-foreground" />
+        </div>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6">

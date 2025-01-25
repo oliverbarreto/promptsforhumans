@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { Plus, Filter, FilterX } from "lucide-react"
+import { Plus, Filter, FilterX, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { CreateGroupDialog } from "@/components/create-group-dialog"
@@ -149,15 +149,25 @@ export default function LibraryPage() {
         </div>
       </div>
 
-      <div className="flex items-center gap-4 mb-6">
-        <PromptFilter value={currentFilter} onValueChange={setCurrentFilter} />
-        <Input
-          type="search"
-          placeholder="Search prompts and groups by title or content..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="max-w-md"
-        />
+      <div className="space-y-4 mb-6">
+        <div className="flex justify-center">
+          <div className="relative max-w-md w-full">
+            <Input
+              type="search"
+              placeholder="Search prompts and groups by title or content..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-4 pr-10 border-2 focus:border-primary"
+            />
+            <Search className="absolute right-3 top-2.5 h-4 w-4 text-muted-foreground" />
+          </div>
+        </div>
+        <div className="flex justify-center">
+          <PromptFilter
+            value={currentFilter}
+            onValueChange={setCurrentFilter}
+          />
+        </div>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6">

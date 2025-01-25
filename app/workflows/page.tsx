@@ -64,43 +64,49 @@ export default function WorkflowsPage() {
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <div className="flex items-center justify-between mb-8">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight">Workflows</h1>
-          <p className="text-muted-foreground">
-            Create and manage your prompt workflows
-          </p>
+      {/* Hero Section */}
+      <div className="relative bg-[linear-gradient(135deg,#0033FF,#3366FF,#6699FF)] bg-[length:300%_300%] animate-gradient text-white py-16 mb-8 rounded-lg">
+        <div className="max-w-3xl mx-auto text-center">
+          <h1 className="text-4xl font-bold mb-4">Workflows</h1>
+          <p className="text-xl">Create and manage your prompt workflows</p>
         </div>
-        <Link href="/workflows/create">
-          <Button size="lg">
-            <Plus className="mr-2 h-4 w-4" />
-            Create Workflow
-          </Button>
-        </Link>
       </div>
 
-      <div className="flex items-center gap-4 mb-8">
-        <div className="relative flex-1">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+      <div className="flex items-center justify-between mb-8">
+        <h2 className="text-3xl font-bold">Explore workflows</h2>
+        <div className="flex items-center gap-2">
+          <Link href="/workflows/create">
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Create Workflow
+            </Button>
+          </Link>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setShowFilters(!showFilters)}
+            title={showFilters ? "Hide filters" : "Show filters"}
+          >
+            {showFilters ? (
+              <FilterX className="h-4 w-4" />
+            ) : (
+              <Filter className="h-4 w-4" />
+            )}
+          </Button>
+        </div>
+      </div>
+
+      <div className="mb-6 flex justify-center">
+        <div className="relative max-w-md w-full">
           <Input
+            type="search"
             placeholder="Search workflows by title or content..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-8"
+            className="w-full pl-4 pr-10 border-2 focus:border-primary"
           />
+          <Search className="absolute right-3 top-2.5 h-4 w-4 text-muted-foreground" />
         </div>
-        <Button
-          variant="outline"
-          size="icon"
-          className={cn(showFilters && "bg-muted")}
-          onClick={() => setShowFilters(!showFilters)}
-        >
-          {showFilters ? (
-            <FilterX className="h-4 w-4" />
-          ) : (
-            <Filter className="h-4 w-4" />
-          )}
-        </Button>
       </div>
 
       <div className="flex flex-col md:flex-row gap-8">
