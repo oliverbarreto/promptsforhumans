@@ -56,15 +56,21 @@ export function PromptSelectorDialog({
   }, [isOpen])
 
   const loadGroups = async () => {
-    const storedGroups = localStorage.getItem("groups")
-    console.log("Loading groups from localStorage:", storedGroups)
-
-    if (storedGroups) {
-      const parsedGroups = JSON.parse(storedGroups)
-      console.log("Parsed groups:", parsedGroups)
-      setGroups(parsedGroups)
-    } else {
-      console.log("No groups found in localStorage")
+    try {
+      const storedGroups = localStorage.getItem("groups")
+      if (storedGroups) {
+        const parsedGroups = JSON.parse(storedGroups)
+        // Transform the data to match Group type
+        const formattedGroups = parsedGroups.map((group: any) => ({
+          id: group.id,
+          title: group.name, // Using name as title
+          description: group.description
+        }))
+        setGroups(formattedGroups)
+      }
+    } catch (error) {
+      console.error("Error loading groups:", error)
+      setError("Failed to load groups")
     }
   }
 
@@ -112,9 +118,11 @@ export function PromptSelectorDialog({
     }
   }
 
-  const filteredPrompts = selectedGroup
-    ? prompts.filter((prompt) => prompt.group === selectedGroup)
-    : prompts
+  // Filter prompts based on selected group
+  const filteredPrompts = prompts.filter((prompt) => {
+    if (!selectedGroup) return true // Show all prompts if no group selected
+    return prompt.groupId === selectedGroup // Match based on groupId
+  })
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
