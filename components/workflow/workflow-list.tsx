@@ -19,9 +19,15 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { deleteWorkflow } from "@/actions/workflow.action"
 import { toast } from "sonner"
+import { ArrowRight } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
 
-export function WorkflowList() {
-  const [workflows, setWorkflows] = useState<Workflow[]>([])
+interface WorkflowListProps {
+  workflows: Workflow[]
+}
+
+export function WorkflowList({ workflows }: WorkflowListProps) {
+  const [localWorkflows, setLocalWorkflows] = useState<Workflow[]>([])
 
   useEffect(() => {
     // Load workflows from localStorage
@@ -29,7 +35,7 @@ export function WorkflowList() {
     if (storedWorkflows) {
       try {
         const parsedWorkflows = JSON.parse(storedWorkflows)
-        setWorkflows(parsedWorkflows)
+        setLocalWorkflows(parsedWorkflows)
       } catch (error) {
         console.error("Error parsing workflows:", error)
       }
@@ -44,9 +50,11 @@ export function WorkflowList() {
 
       if (success) {
         // Update local storage
-        const updatedWorkflows = workflows.filter((w) => w.id !== workflowId)
+        const updatedWorkflows = localWorkflows.filter(
+          (w) => w.id !== workflowId
+        )
         localStorage.setItem("workflows", JSON.stringify(updatedWorkflows))
-        setWorkflows(updatedWorkflows)
+        setLocalWorkflows(updatedWorkflows)
         toast.success("Workflow deleted successfully")
       } else {
         toast.error("Failed to delete workflow")
@@ -57,58 +65,43 @@ export function WorkflowList() {
     }
   }
 
-  if (workflows.length === 0) {
+  if (!workflows.length) {
     return (
       <div className="text-center py-12">
         <p className="text-muted-foreground">No workflows found</p>
+        <p className="text-sm text-muted-foreground mt-1">
+          Create a new workflow to get started
+        </p>
       </div>
     )
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-6">
       {workflows.map((workflow) => (
-        <Link href={`/workflows/${workflow.id}`} key={workflow.id}>
-          <Card className="hover:bg-accent/50 transition-colors cursor-pointer p-6">
-            <div className="flex items-start justify-between">
-              <div className="space-y-4">
-                <div>
-                  <CardTitle className="text-xl mb-2">
-                    {workflow.title}
-                  </CardTitle>
-                  <CardDescription className="text-sm text-muted-foreground">
-                    {workflow.description}
-                  </CardDescription>
-                </div>
-                <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                  <span className="flex items-center">
-                    {workflow.steps.length} steps
-                  </span>
-                  <span className="text-muted-foreground/60">•</span>
-                </div>
+        <Link key={workflow.id} href={`/workflows/${workflow.id}`}>
+          <Card className="p-6 hover:bg-muted/50 transition-colors">
+            <div className="flex flex-col gap-4">
+              <div>
+                <h3 className="font-semibold text-xl mb-1">{workflow.title}</h3>
+                <p className="text-muted-foreground line-clamp-2">
+                  {workflow.description}
+                </p>
               </div>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 hover:bg-accent"
-                    onClick={(e) => e.preventDefault()}
-                  >
-                    <MoreVertical className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem>Edit</DropdownMenuItem>
-                  <DropdownMenuItem>Duplicate</DropdownMenuItem>
-                  <DropdownMenuItem
-                    className="text-destructive"
-                    onClick={(e) => handleDelete(workflow.id, e)}
-                  >
-                    Delete
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <Badge variant="secondary">
+                    {workflow.steps.length}{" "}
+                    {workflow.steps.length === 1 ? "step" : "steps"}
+                  </Badge>
+                  <span className="text-sm text-muted-foreground">
+                    Updated {new Date(workflow.updatedAt).toLocaleDateString()}
+                  </span>
+                </div>
+                <Button variant="ghost" size="icon">
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </Card>
         </Link>
