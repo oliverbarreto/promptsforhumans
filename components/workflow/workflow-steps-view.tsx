@@ -34,7 +34,9 @@ export function WorkflowStepsView({ workflow }: WorkflowStepsViewProps) {
               <div className="flex items-center gap-2">
                 <StepDetailsDialog step={step} stepNumber={index + 1} />
                 {step.prompt && (
-                  <Link href={`/prompt/${step.prompt.id}?from=workflow`}>
+                  <Link
+                    href={`/prompt/${step.prompt.id}?from=workflow&workflowId=${workflow.id}`}
+                  >
                     <Button variant="outline" size="sm">
                       <ExternalLink className="h-4 w-4 mr-2" />
                       View Prompt Details

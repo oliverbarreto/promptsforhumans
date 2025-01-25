@@ -286,7 +286,15 @@ export default function PromptDetailPage() {
   if (!prompt || !currentVersionData) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <Link href={sourceRoute === "home" ? "/" : `/${sourceRoute}`}>
+        <Link
+          href={
+            sourceRoute === "home"
+              ? "/"
+              : sourceRoute === "workflow"
+              ? `/workflows/${searchParams.get("workflowId")}`
+              : `/${sourceRoute}`
+          }
+        >
           <Button variant="ghost" className="mb-4">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to {sourceRoute.charAt(0).toUpperCase() + sourceRoute.slice(1)}
@@ -301,7 +309,15 @@ export default function PromptDetailPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <Link href={sourceRoute === "home" ? "/" : `/${sourceRoute}`}>
+      <Link
+        href={
+          sourceRoute === "home"
+            ? "/"
+            : sourceRoute === "workflow"
+            ? `/workflows/${searchParams.get("workflowId")}`
+            : `/${sourceRoute}`
+        }
+      >
         <Button variant="ghost" className="mb-4">
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to {sourceRoute.charAt(0).toUpperCase() + sourceRoute.slice(1)}
