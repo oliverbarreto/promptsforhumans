@@ -49,6 +49,8 @@ interface EditedPromptData extends Partial<PromptVersion> {
 export default function PromptDetailPage() {
   const { id } = useParams() as { id: string }
   const router = useRouter()
+  const searchParams = new URLSearchParams(window.location.search)
+  const sourceRoute = searchParams.get("from") || "explore"
   const [prompt, setPrompt] = useState<Prompt | null>(null)
   const [groups, setGroups] = useState<Group[]>([])
   const [selectedVersion, setSelectedVersion] = useState<string | null>(null)
@@ -279,10 +281,10 @@ export default function PromptDetailPage() {
   if (!prompt || !currentVersionData) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <Link href="/explore">
+        <Link href={`/${sourceRoute}`}>
           <Button variant="ghost" className="mb-4">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Explore
+            Back to {sourceRoute.charAt(0).toUpperCase() + sourceRoute.slice(1)}
           </Button>
         </Link>
         <div className="flex items-center justify-center h-64">
@@ -294,10 +296,10 @@ export default function PromptDetailPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <Link href="/explore">
+      <Link href={`/${sourceRoute}`}>
         <Button variant="ghost" className="mb-4">
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Explore
+          Back to {sourceRoute.charAt(0).toUpperCase() + sourceRoute.slice(1)}
         </Button>
       </Link>
 
@@ -522,7 +524,6 @@ export default function PromptDetailPage() {
                   <TabsList>
                     <TabsTrigger value="content">Content</TabsTrigger>
                     <TabsTrigger value="details">Details</TabsTrigger>
-                    <TabsTrigger value="metadata">Metadata</TabsTrigger>
                   </TabsList>
                   <TabsContent value="content" className="space-y-4">
                     <div className="prose dark:prose-invert max-w-none">
@@ -531,52 +532,72 @@ export default function PromptDetailPage() {
                       </p>
                     </div>
                   </TabsContent>
-                  <TabsContent value="details" className="space-y-4">
+                  <TabsContent value="details" className="space-y-8">
+                    {/* Details Section */}
                     <div className="prose dark:prose-invert max-w-none">
+                      <h3 className="text-lg font-semibold mb-2">
+                        Description
+                      </h3>
                       <p>{currentVersionData.details}</p>
                     </div>
+
+                    {/* Use Cases Section */}
                     <div>
-                      <h3 className="font-semibold mb-2">Use Cases</h3>
-                      <ul className="list-disc list-inside">
+                      <h3 className="text-lg font-semibold mb-2">Use Cases</h3>
+                      <ul className="list-disc list-inside space-y-1">
                         {currentVersionData.useCases.map((useCase, index) => (
                           <li key={index}>{useCase}</li>
                         ))}
                       </ul>
                     </div>
-                  </TabsContent>
-                  <TabsContent value="metadata" className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <h3 className="font-semibold mb-2">Type</h3>
-                        <p>{currentVersionData.type}</p>
-                      </div>
-                      <div>
-                        <h3 className="font-semibold mb-2">Language</h3>
-                        <p>{currentVersionData.language}</p>
-                      </div>
-                      <div>
-                        <h3 className="font-semibold mb-2">Models</h3>
-                        <div className="flex flex-wrap gap-2">
-                          {currentVersionData.models.map((model, index) => (
-                            <Badge key={index} variant="secondary">
-                              {model}
-                            </Badge>
-                          ))}
+
+                    {/* Technical Details Section */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-6">
+                        <div>
+                          <h3 className="text-lg font-semibold mb-2">Type</h3>
+                          <Badge variant="outline">
+                            {currentVersionData.type}
+                          </Badge>
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold mb-2">
+                            Language
+                          </h3>
+                          <Badge variant="outline">
+                            {currentVersionData.language}
+                          </Badge>
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold mb-2">
+                            Visibility
+                          </h3>
+                          <Badge variant="outline">
+                            {currentVersionData.visibility}
+                          </Badge>
                         </div>
                       </div>
-                      <div>
-                        <h3 className="font-semibold mb-2">Tools</h3>
-                        <div className="flex flex-wrap gap-2">
-                          {currentVersionData.tools.map((tool, index) => (
-                            <Badge key={index} variant="secondary">
-                              {tool}
-                            </Badge>
-                          ))}
+                      <div className="space-y-6">
+                        <div>
+                          <h3 className="text-lg font-semibold mb-2">Models</h3>
+                          <div className="flex flex-wrap gap-2">
+                            {currentVersionData.models.map((model, index) => (
+                              <Badge key={index} variant="secondary">
+                                {model}
+                              </Badge>
+                            ))}
+                          </div>
                         </div>
-                      </div>
-                      <div>
-                        <h3 className="font-semibold mb-2">Visibility</h3>
-                        <p>{currentVersionData.visibility}</p>
+                        <div>
+                          <h3 className="text-lg font-semibold mb-2">Tools</h3>
+                          <div className="flex flex-wrap gap-2">
+                            {currentVersionData.tools.map((tool, index) => (
+                              <Badge key={index} variant="secondary">
+                                {tool}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </TabsContent>

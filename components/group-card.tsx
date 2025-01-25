@@ -31,7 +31,9 @@ export function GroupCard({
       <div className="p-6">
         <div className="flex items-center justify-between">
           <Link
-            href={`/library/groups/${group.id}`}
+            href={`/library/groups/${group.id}?from=${
+              window.location.pathname.split("/")[1] || "library"
+            }`}
             className="text-xl font-semibold hover:underline"
           >
             {group.name}

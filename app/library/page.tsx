@@ -91,9 +91,10 @@ export default function LibraryPage() {
 
   const filteredPrompts = prompts.filter((prompt) => {
     // Apply search term filter
-    const matchesSearch = prompt.title
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase())
+    const searchTermLower = searchTerm.toLowerCase()
+    const matchesSearch =
+      prompt.title.toLowerCase().includes(searchTermLower) ||
+      prompt.versions[0].content.toLowerCase().includes(searchTermLower)
 
     // Apply visibility filter
     const matchesVisibility =
@@ -152,7 +153,7 @@ export default function LibraryPage() {
         <PromptFilter value={currentFilter} onValueChange={setCurrentFilter} />
         <Input
           type="search"
-          placeholder="Search prompts and groups..."
+          placeholder="Search prompts and groups by title or content..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="max-w-md"

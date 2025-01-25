@@ -44,9 +44,10 @@ export default function HomePage() {
 
   const filteredPrompts = prompts.filter((prompt) => {
     // Apply search term filter
-    const matchesSearch = prompt.title
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase())
+    const searchTermLower = searchTerm.toLowerCase()
+    const matchesSearch =
+      prompt.title.toLowerCase().includes(searchTermLower) ||
+      prompt.versions[0].content.toLowerCase().includes(searchTermLower)
 
     // Apply sidebar filters
     const matchesFilters = Object.entries(filters).every(([key, values]) => {
@@ -102,7 +103,7 @@ export default function HomePage() {
       <div className="mb-6">
         <Input
           type="search"
-          placeholder="Search prompts..."
+          placeholder="Search prompts by title or content..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="max-w-md"
