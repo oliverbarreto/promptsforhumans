@@ -26,7 +26,7 @@ export function WorkflowSteps({ workflow }: WorkflowStepsProps) {
               <div className="space-y-4">
                 <div className="flex items-center gap-4">
                   <div className="bg-primary text-primary-foreground w-8 h-8 rounded-full flex items-center justify-center font-medium">
-                    {step.order}
+                    {index + 1}
                   </div>
                   <div className="flex-1">
                     <h3 className="font-medium">{step.title}</h3>

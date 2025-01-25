@@ -86,7 +86,9 @@ export function GroupCard({
           )}
           <div className="mt-4 flex items-center gap-2">
             <Badge variant="secondary">{group.promptCount} prompts</Badge>
-            <Badge variant="outline">{group.visibility}</Badge>
+            <Badge variant="outline">
+              {group.isPublic ? "Public" : "Private"}
+            </Badge>
           </div>
         </div>
       </Card>

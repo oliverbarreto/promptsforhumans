@@ -34,6 +34,7 @@ function PromptGrid({
           key={prompt.id}
           prompt={prompt}
           onUpdatePrompt={onUpdatePrompt}
+          isSelected={false}
         />
       ))}
     </div>
@@ -120,7 +121,7 @@ export default function ExplorePage() {
             prompt.versions[0].content
               .toLowerCase()
               .includes(lowercasedSearchTerm) ||
-            prompt.tags.some((tag) =>
+            prompt.tags?.some((tag) =>
               tag.toLowerCase().includes(lowercasedSearchTerm)
             )
         )
@@ -131,9 +132,12 @@ export default function ExplorePage() {
         if (values.length > 0) {
           filtered = filtered.filter((prompt) => {
             if (key === "useCases" || key === "models" || key === "tools") {
-              return prompt.versions[0][
-                key as keyof (typeof prompt.versions)[0]
-              ].some((value: string) => values.includes(value))
+              const versionValue =
+                prompt.versions[0][key as keyof (typeof prompt.versions)[0]]
+              return (
+                Array.isArray(versionValue) &&
+                versionValue.some((value: string) => values.includes(value))
+              )
             } else if (Array.isArray(prompt[key as keyof Prompt])) {
               return (prompt[key as keyof Prompt] as string[]).some((value) =>
                 values.includes(value)

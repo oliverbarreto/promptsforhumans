@@ -78,7 +78,7 @@ export function PromptCard({
         <CardContent className="flex-grow">
           <p className="line-clamp-3">{prompt.versions[0].content}</p>
           <div className="flex flex-wrap gap-2 mt-4">
-            {prompt.tags.map((tag) => (
+            {(prompt.tags ?? []).map((tag) => (
               <Badge key={tag} variant="secondary">
                 {tag}
               </Badge>

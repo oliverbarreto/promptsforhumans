@@ -37,7 +37,7 @@ export function WorkflowStepsView({ workflow }: WorkflowStepsViewProps) {
                   <Link href={`/prompt/${step.prompt.id}?from=workflow`}>
                     <Button variant="outline" size="sm">
                       <ExternalLink className="h-4 w-4 mr-2" />
-                      View step
+                      View Prompt Details
                     </Button>
                   </Link>
                 )}

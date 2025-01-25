@@ -130,13 +130,13 @@ export default function CreatePromptPage() {
         createdAt: new Date().toISOString(),
         visibility: prompt.visibility
       }
-
       // Create the new prompt object
       const newPrompt: Prompt = {
         id: promptId,
         title: prompt.title,
         content: prompt.content,
         tags: prompt.tags,
+        visibility: prompt.visibility,
         group: prompt.group,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -145,10 +145,10 @@ export default function CreatePromptPage() {
         author: {
           id: "current-user",
           name: "Current User",
-          avatar: null
+          avatar: undefined,
+          email: "user@example.com" // Added required email field
         },
         likes: 0,
-        views: 0,
         isFavorite: false,
         isArchived: false
       }

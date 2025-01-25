@@ -12,4 +12,5 @@ export type Group = {
   userId: string
   isPublic: boolean
   isFavorite: boolean
+  visibility: "public" | "private"
 }

@@ -184,7 +184,7 @@ export default function WorkflowPage({ params }: { params: { id: string } }) {
                                 </div>
                               )}
                             <div className="pt-2">
-                              <Link href={`/prompts/${step.prompt.id}`}>
+                              <Link href={`/prompt/${step.prompt.id}`}>
                                 <Button variant="outline" size="sm">
                                   View Prompt Details
                                 </Button>

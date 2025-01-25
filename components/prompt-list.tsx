@@ -16,6 +16,7 @@ export function PromptList({ prompts, onUpdatePrompt }: PromptListProps) {
           key={prompt.id}
           prompt={prompt}
           onUpdatePrompt={(updatedPrompt) => onUpdatePrompt?.(updatedPrompt)}
+          isSelected={false}
         />
       ))}
     </div>

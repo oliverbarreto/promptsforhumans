@@ -33,16 +33,13 @@ export function CreateGroupDialog({
   const [description, setDescription] = useState(
     initialGroup?.description || ""
   )
-  const [visibility, setVisibility] = useState<"public" | "private">(
-    initialGroup?.visibility || "public"
-  )
+  const [visibility, setVisibility] = useState<"public" | "private">("public")
 
   // Reset form when dialog opens/closes or initialGroup changes
   useEffect(() => {
     if (initialGroup) {
       setName(initialGroup.name)
       setDescription(initialGroup.description)
-      setVisibility(initialGroup.visibility)
     } else {
       setName("")
       setDescription("")
@@ -59,8 +56,7 @@ export function CreateGroupDialog({
         ...initialGroup,
         name,
         description,
-        visibility,
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date()
       }
       onSubmit(updatedGroup)
     } else {
@@ -69,13 +65,15 @@ export function CreateGroupDialog({
         id: String(Date.now()),
         name,
         description,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
         isFavorite: false,
-        promptCount: 0,
-        authorId: "current-user", // This would come from auth
         visibility,
-        prompts: [] // Initialize empty prompts array
+        prompts: [], // Initialize empty prompts array
+        title: "",
+        promptCount: 0,
+        userId: "",
+        isPublic: false
       }
       onSubmit(newGroup)
     }

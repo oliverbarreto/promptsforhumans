@@ -52,12 +52,23 @@ export default function HomePage() {
     // Apply sidebar filters
     const matchesFilters = Object.entries(filters).every(([key, values]) => {
       if (values.length === 0) return true
-      if (key === "type") return prompt.type && values.includes(prompt.type)
-      if (key === "language")
-        return prompt.language && values.includes(prompt.language)
-      if (key === "model") return prompt.model && values.includes(prompt.model)
       if (key === "visibility")
         return prompt.visibility && values.includes(prompt.visibility)
+      // Access version properties for type, language and model
+      if (key === "type")
+        return (
+          prompt.versions[0].type && values.includes(prompt.versions[0].type)
+        )
+      if (key === "language")
+        return (
+          prompt.versions[0].language &&
+          values.includes(prompt.versions[0].language)
+        )
+      if (key === "model")
+        return (
+          prompt.versions[0].models &&
+          prompt.versions[0].models.some((model) => values.includes(model))
+        )
       return true
     })
 

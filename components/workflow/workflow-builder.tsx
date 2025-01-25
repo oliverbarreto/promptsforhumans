@@ -41,9 +41,9 @@ export function WorkflowBuilder() {
         title: title.trim(),
         description: description.trim(),
         steps: [], // Start with empty steps
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        userId: "1", // TODO: Get from auth
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        // userId: "1", // TODO: Get from auth
         isPublic: true,
         isFavorite: false
       }

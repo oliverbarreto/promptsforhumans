@@ -1,3 +1,4 @@
+import { type ReactNode } from "react"
 import { Prompt } from "./prompt"
 
 export interface WorkflowStep {
@@ -14,4 +15,6 @@ export interface Workflow {
   steps: WorkflowStep[]
   createdAt: string
   updatedAt: string
+  isPublic: boolean
+  isFavorite: boolean
 }
