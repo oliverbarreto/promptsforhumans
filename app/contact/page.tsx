@@ -9,12 +9,21 @@ import { Textarea } from "@/components/ui/textarea"
 export default function ContactPage() {
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
+  const [subject, setSubject] = useState("")
   const [message, setMessage] = useState("")
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // Implement form submission logic here
-    console.log("Form submitted:", { name, email, message })
+
+    // Create mailto URL with all form fields
+    const mailtoUrl = `mailto:${
+      process.env.NEXT_PUBLIC_APP_EMAIL_ADDRESS
+    }?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(
+      `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`
+    )}`
+
+    // Open default email client
+    window.location.href = mailtoUrl
   }
 
   return (
@@ -37,6 +46,15 @@ export default function ContactPage() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="subject">Subject</Label>
+          <Input
+            id="subject"
+            value={subject}
+            onChange={(e) => setSubject(e.target.value)}
             required
           />
         </div>
