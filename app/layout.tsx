@@ -4,7 +4,8 @@ import { Inter } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Sidebar } from "@/components/sidebar"
 import { Toaster } from "@/components/ui/toaster"
-import { mockPrompts, mockGroups } from "@/data/mock-data"
+import { mockPrompts, mockGroups, mockWorkflows } from "@/data/mock-data"
+import { Toaster as SonnerToaster } from "sonner"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -50,6 +51,24 @@ function initializeLocalStorage() {
         localStorage.setItem("groups", JSON.stringify(mockGroups))
       }
     }
+
+    // Initialize workflows
+    const storedWorkflows = localStorage.getItem("workflows")
+    if (!storedWorkflows) {
+      console.log("Initializing mock workflows...")
+      localStorage.setItem("workflows", JSON.stringify(mockWorkflows))
+    } else {
+      // Update existing workflows if needed
+      try {
+        const existingWorkflows = JSON.parse(storedWorkflows)
+        if (!existingWorkflows || existingWorkflows.length === 0) {
+          localStorage.setItem("workflows", JSON.stringify(mockWorkflows))
+        }
+      } catch (error) {
+        console.error("Error parsing stored workflows:", error)
+        localStorage.setItem("workflows", JSON.stringify(mockWorkflows))
+      }
+    }
   }
 }
 
@@ -72,6 +91,7 @@ export default function RootLayout({
             <main className="flex-1 p-8">{children}</main>
           </div>
           <Toaster />
+          <SonnerToaster />
         </ThemeProvider>
         <script
           dangerouslySetInnerHTML={{

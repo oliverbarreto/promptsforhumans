@@ -1,12 +1,13 @@
-export interface Group {
+import { Prompt } from "./prompt"
+
+export type Group = {
   id: string
-  name: string
+  title: string
   description: string
-  promptCount: number
+  prompts: Prompt[]
+  createdAt: Date
+  updatedAt: Date
+  userId: string
+  isPublic: boolean
   isFavorite: boolean
-  createdAt: string
-  updatedAt: string
-  authorId: string
-  visibility: "public" | "private"
-  prompts: string[]
 }

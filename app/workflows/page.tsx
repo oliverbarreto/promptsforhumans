@@ -1,49 +1,39 @@
 "use client"
 
 import { useState } from "react"
-import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
+import { Plus } from "lucide-react"
+import Link from "next/link"
 
-// Mock data
-const mockWorkflows = [
-  { id: 1, name: "Content Creation Pipeline", description: "Generate, edit, and optimize content" },
-  {
-    id: 2,
-    name: "Customer Support Flow",
-    description: "Handle customer inquiries and route to appropriate departments",
-  },
-  { id: 3, name: "Data Analysis Workflow", description: "Clean, analyze, and visualize data" },
-]
+import { WorkflowList } from "@/components/workflow/workflow-list"
+import { WorkflowFilters } from "@/components/workflow/workflow-filters"
 
 export default function WorkflowsPage() {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [workflows, setWorkflows] = useState(mockWorkflows)
-
-  const filteredWorkflows = workflows.filter((workflow) =>
-    workflow.name.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
-
   return (
-    <div>
-      <h1 className="text-3xl font-bold mb-4">Workflows</h1>
-      <div className="flex gap-2 mb-4">
-        <Input placeholder="Search workflows..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-        <Button>Search</Button>
+    <div className="container mx-auto py-8 px-4">
+      <div className="flex items-center justify-between mb-12">
+        <div className="space-y-1">
+          <h1 className="text-3xl font-bold tracking-tight">Workflows</h1>
+          <p className="text-muted-foreground">
+            Create and manage your prompt workflows
+          </p>
+        </div>
+        <Link href="/workflows/create">
+          <Button size="lg">
+            <Plus className="mr-2 h-4 w-4" />
+            Create Workflow
+          </Button>
+        </Link>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredWorkflows.map((workflow) => (
-          <Card key={workflow.id}>
-            <CardHeader>
-              <CardTitle>{workflow.name}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p>{workflow.description}</p>
-            </CardContent>
-          </Card>
-        ))}
+
+      <div className="flex flex-col md:flex-row gap-8">
+        <main className="flex-1 min-w-0 space-y-6">
+          <WorkflowList />
+        </main>
+        <aside className="w-full md:w-[300px]">
+          <WorkflowFilters />
+        </aside>
       </div>
     </div>
   )
 }
-
