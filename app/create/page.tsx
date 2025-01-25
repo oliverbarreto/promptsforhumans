@@ -34,6 +34,7 @@ export default function CreatePromptPage() {
     type: "",
     language: "",
     model: "",
+    tools: [],
     visibility: "public",
     groupId: groupId || undefined
   })
@@ -62,7 +63,13 @@ export default function CreatePromptPage() {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target
-    setPrompt((prev) => ({ ...prev, [name]: value }))
+    setPrompt((prev) => ({
+      ...prev,
+      [name]:
+        name === "useCases" || name === "tags" || name === "tools"
+          ? value.split(",").map((item) => item.trim())
+          : value
+    }))
   }
 
   const handleVisibilityChange = (value: "public" | "private") => {
@@ -111,6 +118,7 @@ export default function CreatePromptPage() {
         type: prompt.type || "general",
         language: prompt.language || "en",
         model: prompt.model || "gpt-4",
+        tools: prompt.tools || [],
         visibility: prompt.visibility || "public",
         groupId: prompt.groupId, // This will be undefined if no group is selected
         createdAt: new Date().toISOString(),
@@ -256,12 +264,7 @@ export default function CreatePromptPage() {
             id="useCases"
             name="useCases"
             value={prompt.useCases?.join(", ")}
-            onChange={(e) =>
-              setPrompt((prev) => ({
-                ...prev,
-                useCases: e.target.value.split(",").map((s) => s.trim())
-              }))
-            }
+            onChange={handleInputChange}
             placeholder="e.g., Summarization, Expanding, Creative Writing"
           />
         </div>
@@ -292,7 +295,17 @@ export default function CreatePromptPage() {
             name="model"
             value={prompt.model}
             onChange={handleInputChange}
-            placeholder="e.g., GPT-4"
+            placeholder="e.g., gpt-4, claude-3"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="tools">Tools (comma-separated)</Label>
+          <Input
+            id="tools"
+            name="tools"
+            value={prompt.tools?.join(", ") || ""}
+            onChange={handleInputChange}
+            placeholder="e.g., codebase_search, edit_file, run_terminal_cmd"
           />
         </div>
         <div className="space-y-2">
@@ -301,12 +314,7 @@ export default function CreatePromptPage() {
             id="tags"
             name="tags"
             value={prompt.tags?.join(", ")}
-            onChange={(e) =>
-              setPrompt((prev) => ({
-                ...prev,
-                tags: e.target.value.split(",").map((s) => s.trim())
-              }))
-            }
+            onChange={handleInputChange}
             placeholder="e.g., creative, coding, marketing"
           />
         </div>

@@ -30,6 +30,7 @@ export interface Prompt {
   type?: string
   language?: string
   model?: string
+  tools?: string[]
   author: Author
   createdAt: string
   updatedAt?: string

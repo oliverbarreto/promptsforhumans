@@ -31,13 +31,24 @@ Basic features:
 - [x] Side Filter AI prompts by category
 
 - [x] Version control for your AI prompts (in an easy way for normal people and need to be a developer to do it)
+- [x] Be able to mark prompts as favorite
+- [x] Be able to mark groups as favorite
+- [x] Be able to mark prompts as archived
+- [] Display the archived prompts
+- [ ] Be able to mark prompts as public or private
+
+Template features:
+
+- [] Be able to add TEMPLATES of prompts
+
+Workflow features:
+
+- [] Be able to add WORKFLOWS of prompts visually
 
 Advanced & Collaborative features:
 
-- [] Be able to add WORKFLOWS of prompts visually
-- [] Be able to add TEMPLATES of prompts
 - [] prompt generator for topic
-- library of proposed prompts
+- [] library of proposed prompts
 
 - [] add laguage support to translate prompts
 

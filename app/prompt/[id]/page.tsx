@@ -44,6 +44,7 @@ import { mockPrompts } from "@/data/mock-data"
 
 interface EditedPromptData extends Partial<PromptVersion> {
   groupId?: string
+  tags?: string[]
 }
 
 export default function PromptDetailPage() {
@@ -177,6 +178,7 @@ export default function PromptDetailPage() {
     const updatedPrompt = {
       ...prompt,
       visibility: editedVersion.visibility || prompt.visibility,
+      tags: editedVersion.tags || prompt.tags,
       versions: prompt.versions.map((v) =>
         v.version === selectedVersion ? updatedVersion : v
       )
@@ -224,13 +226,16 @@ export default function PromptDetailPage() {
     e:
       | React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
       | { target: { name: string; value: string } },
-    field: keyof PromptVersion | "groupId" | "visibility"
+    field: keyof PromptVersion | "groupId" | "visibility" | "tags"
   ) => {
     const { name, value } = e.target
     setEditedVersion((prev) => ({
       ...prev,
       [field]:
-        field === "models" || field === "tools" || field === "useCases"
+        field === "models" ||
+        field === "tools" ||
+        field === "useCases" ||
+        field === "tags"
           ? value.split(",").map((item) => item.trim())
           : value
     }))
@@ -510,6 +515,19 @@ export default function PromptDetailPage() {
                         currentVersionData.tools.join(", ")
                       }
                       onChange={(e) => handleInputChange(e, "tools")}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="tags">Tags (comma-separated)</Label>
+                    <Input
+                      id="tags"
+                      value={
+                        editedVersion.tags?.join(", ") ||
+                        prompt?.tags?.join(", ") ||
+                        ""
+                      }
+                      onChange={(e) => handleInputChange(e, "tags")}
+                      placeholder="Enter tags separated by commas"
                     />
                   </div>
                   <div className="flex justify-end space-x-2">
