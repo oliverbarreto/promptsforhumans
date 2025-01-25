@@ -144,20 +144,21 @@ export function Sidebar({ isAuthenticated }: SidebarProps) {
 }
 
 function WhatsNewButton({ isCollapsed }: { isCollapsed: boolean }) {
-  // Implement What's New modal logic here
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Button
-          variant="ghost"
-          className={cn(
-            "w-full justify-start",
-            isCollapsed && "justify-center"
-          )}
-        >
-          <Bell className="h-5 w-5" />
-          {!isCollapsed && <span className="ml-2">What's New</span>}
-        </Button>
+        <Link href="/whats-new">
+          <Button
+            variant="ghost"
+            className={cn(
+              "w-full justify-start",
+              isCollapsed && "justify-center"
+            )}
+          >
+            <Bell className="h-5 w-5" />
+            {!isCollapsed && <span className="ml-2">What's New</span>}
+          </Button>
+        </Link>
       </TooltipTrigger>
       {isCollapsed && <TooltipContent side="right">What's New</TooltipContent>}
     </Tooltip>

@@ -5,30 +5,51 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { useToast } from "@/components/ui/use-toast"
+import { useRouter } from "next/navigation"
 
 export default function ContactPage() {
   const [name, setName] = useState("")
-  const [email, setEmail] = useState("")
   const [subject, setSubject] = useState("")
   const [message, setMessage] = useState("")
+  const { toast } = useToast()
+  const router = useRouter()
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+
+    const userEmail = localStorage.getItem("userEmail")
+    if (!userEmail) {
+      toast({
+        title: "No email configured",
+        description: "Please configure your email in settings first.",
+        variant: "destructive"
+      })
+      router.push("/settings")
+      return
+    }
 
     // Create mailto URL with all form fields
     const mailtoUrl = `mailto:${
       process.env.NEXT_PUBLIC_APP_EMAIL_ADDRESS
     }?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(
-      `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`
+      `Name: ${name}\nEmail: ${userEmail}\n\nMessage:\n${message}`
     )}`
 
     // Open default email client
     window.location.href = mailtoUrl
+
+    // Show success toast
+    toast({
+      title: "Email client opened",
+      description: `Sending email to ${process.env.NEXT_PUBLIC_APP_EMAIL_ADDRESS} with subject "${subject}"`,
+      duration: 5000
+    })
   }
 
   return (
-    <div>
-      <h1 className="text-3xl font-bold mb-4">Contact Us</h1>
+    <div className="container max-w-2xl mx-auto py-8 px-4">
+      <h1 className="text-3xl font-bold mb-8">Contact Us</h1>
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-2">
           <Label htmlFor="name">Name</Label>
@@ -36,16 +57,6 @@ export default function ContactPage() {
             id="name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            required
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
-          <Input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
             required
           />
         </div>

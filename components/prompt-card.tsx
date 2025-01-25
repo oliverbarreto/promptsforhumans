@@ -35,46 +35,47 @@ export function PromptCard({
   }
 
   return (
-    <Link
-      href={`/prompt/${prompt.id}?from=${
-        window.location.pathname.split("/")[1] || "home"
-      }`}
+    <Card
+      className={cn(
+        "h-full cursor-pointer",
+        "hover:bg-muted/50 transition-colors",
+        isSelected && "border-primary",
+        prompt.isArchived && "opacity-60"
+      )}
     >
-      <Card
-        className={cn(
-          "h-full cursor-pointer",
-          "hover:bg-muted/50 transition-colors",
-          isSelected && "border-primary",
-          prompt.isArchived && "opacity-60"
-        )}
-      >
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <UserAvatar
-                src={prompt.author.avatar}
-                alt={prompt.author.name}
-                width={40}
-                height={40}
-              />
-              <div>
-                <div className="flex items-center gap-2">
-                  <p className="font-semibold">{prompt.author.name}</p>
-                  {prompt.visibility === "public" ? (
-                    <Globe className="h-4 w-4 text-muted-foreground" />
-                  ) : (
-                    <Lock className="h-4 w-4 text-muted-foreground" />
-                  )}
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  {new Date(prompt.createdAt).toLocaleDateString()}
-                </p>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <UserAvatar
+              src={prompt.author.avatar}
+              alt={prompt.author.name}
+              width={40}
+              height={40}
+            />
+            <div>
+              <div className="flex items-center gap-2">
+                <p className="font-semibold">{prompt.author.name}</p>
+                {prompt.visibility === "public" ? (
+                  <Globe className="h-4 w-4 text-muted-foreground" />
+                ) : (
+                  <Lock className="h-4 w-4 text-muted-foreground" />
+                )}
               </div>
+              <p className="text-sm text-muted-foreground">
+                {new Date(prompt.createdAt).toLocaleDateString()}
+              </p>
             </div>
-            <PromptActions prompt={prompt} onUpdatePrompt={onUpdatePrompt} />
           </div>
-          <CardTitle className="mt-4">{prompt.title}</CardTitle>
-        </CardHeader>
+          <PromptActions prompt={prompt} onUpdatePrompt={onUpdatePrompt} />
+        </div>
+        <CardTitle className="mt-4">{prompt.title}</CardTitle>
+      </CardHeader>
+      <Link
+        href={`/prompt/${prompt.id}?from=${
+          window.location.pathname.split("/")[1] || "home"
+        }`}
+      >
+        {" "}
         <CardContent className="flex-grow">
           <p className="line-clamp-3">{prompt.versions[0].content}</p>
           <div className="flex flex-wrap gap-2 mt-4">
@@ -85,18 +86,18 @@ export function PromptCard({
             ))}
           </div>
         </CardContent>
-        <CardFooter className="flex justify-between">
-          <Button variant="ghost" size="sm" onClick={handleFavoriteToggle}>
-            <Heart
-              className={cn(
-                "mr-2 h-4 w-4",
-                prompt.isFavorite && "fill-current text-red-500"
-              )}
-            />
-            {prompt.likes}
-          </Button>
-        </CardFooter>
-      </Card>
-    </Link>
+      </Link>
+      <CardFooter className="flex justify-between">
+        <Button variant="ghost" size="sm" onClick={handleFavoriteToggle}>
+          <Heart
+            className={cn(
+              "mr-2 h-4 w-4",
+              prompt.isFavorite && "fill-current text-red-500"
+            )}
+          />
+          {prompt.likes}
+        </Button>
+      </CardFooter>
+    </Card>
   )
 }
