@@ -10,12 +10,12 @@ interface PromptListProps {
 
 export function PromptList({ prompts, onUpdatePrompt }: PromptListProps) {
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-4 auto-rows-fr grid-cols-[repeat(auto-fill,minmax(300px,1fr))]">
       {prompts.map((prompt) => (
         <PromptCard
           key={prompt.id}
           prompt={prompt}
-          onUpdatePrompt={onUpdatePrompt}
+          onUpdatePrompt={(updatedPrompt) => onUpdatePrompt?.(updatedPrompt)}
         />
       ))}
     </div>

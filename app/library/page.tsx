@@ -12,6 +12,7 @@ import Link from "next/link"
 import type { Group } from "@/types/group"
 import type { Prompt } from "@/types/prompt"
 import { PromptFilter } from "@/components/prompt-filter"
+import { cn } from "@/lib/utils"
 
 export default function LibraryPage() {
   const [groups, setGroups] = useState<Group[]>([])
@@ -158,11 +159,26 @@ export default function LibraryPage() {
         />
       </div>
 
-      <div className="flex gap-6">
-        <div className={`flex-1 space-y-6`}>
+      <div className="flex flex-col lg:flex-row gap-6">
+        <div
+          className={cn(
+            "w-full lg:w-[300px] transition-all duration-200 order-first lg:order-last",
+            isFilterVisible ? "block" : "hidden"
+          )}
+        >
+          <div className="lg:sticky lg:top-4">
+            <FiltersSidebar
+              prompts={prompts}
+              selectedFilters={filters}
+              onFilterChange={handleSidebarFilterChange}
+            />
+          </div>
+        </div>
+
+        <div className="flex-1 space-y-6">
           <div className="space-y-4">
             <h2 className="text-2xl font-semibold">Groups</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid gap-4 auto-rows-fr grid-cols-[repeat(auto-fill,minmax(300px,1fr))]">
               {filteredGroups.map((group) => (
                 <GroupCard
                   key={group.id}
@@ -180,20 +196,6 @@ export default function LibraryPage() {
             <PromptList
               prompts={filteredPrompts}
               onUpdatePrompt={handleUpdatePrompt}
-            />
-          </div>
-        </div>
-
-        <div
-          className={`w-[300px] transition-all duration-200 ${
-            isFilterVisible ? "block" : "hidden"
-          }`}
-        >
-          <div className="sticky top-4">
-            <FiltersSidebar
-              prompts={prompts}
-              selectedFilters={filters}
-              onFilterChange={handleSidebarFilterChange}
             />
           </div>
         </div>

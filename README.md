@@ -54,6 +54,13 @@ UX/UI:
 - [x] Responsive desing
 - [] Be able to sign in multiple users
 
+AI features:
+
+- [] Addd AI to generate prompts
+- [] Addd AI to generate workflows
+- [] Addd AI to generate templates
+- [] Addd AI to find similar prompts for a prompt
+
 Browser extension:
 
 - [] link browser extension to allow "text expander" and "autocomplete" in your browser when using tools like ChatGPT, DeepSeek, Claude, etc.
