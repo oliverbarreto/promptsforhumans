@@ -3,8 +3,10 @@ import { Prompt } from "./prompt"
 export type Group = {
   id: string
   title: string
+  name: string
   description: string
-  prompts: Prompt[]
+  prompts: string[]
+  promptCount: number
   createdAt: Date
   updatedAt: Date
   userId: string

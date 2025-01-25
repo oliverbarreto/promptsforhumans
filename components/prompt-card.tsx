@@ -35,7 +35,11 @@ export function PromptCard({
   }
 
   return (
-    <Link href={`/prompts/${prompt.id}`}>
+    <Link
+      href={`/prompt/${prompt.id}?from=${
+        window.location.pathname.split("/")[1] || "home"
+      }`}
+    >
       <Card
         className={cn(
           "h-full cursor-pointer",
@@ -91,16 +95,6 @@ export function PromptCard({
             />
             {prompt.likes}
           </Button>
-          <Link
-            href={`/prompt/${prompt.id}?from=${
-              window.location.pathname.split("/")[1] || "home"
-            }`}
-          >
-            <Button variant="ghost" size="sm">
-              <MessageCircle className="mr-2 h-4 w-4" />
-              View Details
-            </Button>
-          </Link>
         </CardFooter>
       </Card>
     </Link>

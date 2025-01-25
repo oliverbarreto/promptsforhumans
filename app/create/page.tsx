@@ -17,7 +17,7 @@ import {
   SelectValue
 } from "@/components/ui/select"
 import { CreateGroupDialog } from "@/components/create-group-dialog"
-import type { Prompt } from "@/types/prompt"
+import type { Prompt, PromptVersion } from "@/types/prompt"
 import type { Group } from "@/types/group"
 
 export default function CreatePromptPage() {
@@ -25,18 +25,28 @@ export default function CreatePromptPage() {
   const searchParams = new URLSearchParams(window.location.search)
   const groupId = searchParams.get("groupId")
 
-  const [prompt, setPrompt] = useState<Partial<Prompt>>({
+  const [prompt, setPrompt] = useState<{
+    title: string
+    content: string
+    tags: string[]
+    type: string
+    language: string
+    model: string
+    tools: string[]
+    useCases: string[]
+    visibility: "public" | "private"
+    group: string
+  }>({
     title: "",
     content: "",
     tags: [],
-    details: "",
-    useCases: [],
     type: "",
     language: "",
     model: "",
     tools: [],
+    useCases: [],
     visibility: "public",
-    groupId: groupId || undefined
+    group: groupId || ""
   })
   const [groups, setGroups] = useState<Group[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -51,11 +61,11 @@ export default function CreatePromptPage() {
     }
   }, [])
 
-  // Update groupId when URL parameter changes
+  // Update group when URL parameter changes
   useEffect(() => {
     setPrompt((prev) => ({
       ...prev,
-      groupId: groupId || undefined
+      group: groupId || ""
     }))
   }, [groupId])
 
@@ -79,7 +89,7 @@ export default function CreatePromptPage() {
   const handleGroupChange = (value: string) => {
     setPrompt((prev) => ({
       ...prev,
-      groupId: value || undefined
+      group: value || ""
     }))
   }
 
@@ -87,7 +97,7 @@ export default function CreatePromptPage() {
     const updatedGroups = [...groups, newGroup]
     setGroups(updatedGroups)
     localStorage.setItem("groups", JSON.stringify(updatedGroups))
-    setPrompt((prev) => ({ ...prev, groupId: newGroup.id }))
+    setPrompt((prev) => ({ ...prev, group: newGroup.id }))
     setIsCreateGroupOpen(false)
   }
 
@@ -107,38 +117,31 @@ export default function CreatePromptPage() {
       // Generate a unique ID for the new prompt
       const promptId = String(Date.now())
 
+      const version: PromptVersion = {
+        id: `${promptId}-1`,
+        version: "1",
+        content: prompt.content,
+        models: [prompt.model || "gpt-4"],
+        details: "",
+        useCases: prompt.useCases || [],
+        type: "completion",
+        language: "en",
+        tools: prompt.tools || [],
+        createdAt: new Date().toISOString(),
+        visibility: prompt.visibility
+      }
+
       // Create the new prompt object
       const newPrompt: Prompt = {
         id: promptId,
         title: prompt.title,
         content: prompt.content,
-        tags: prompt.tags || [],
-        details: prompt.details || "",
-        useCases: prompt.useCases || [],
-        type: prompt.type || "general",
-        language: prompt.language || "en",
-        model: prompt.model || "gpt-4",
-        tools: prompt.tools || [],
-        visibility: prompt.visibility || "public",
-        groupId: prompt.groupId, // This will be undefined if no group is selected
+        tags: prompt.tags,
+        group: prompt.group,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         currentVersion: "1",
-        versions: [
-          {
-            id: `${promptId}-1`,
-            version: "1",
-            content: prompt.content,
-            details: prompt.details || "",
-            useCases: prompt.useCases || [],
-            type: prompt.type || "general",
-            language: prompt.language || "en",
-            models: [prompt.model || "gpt-4"],
-            tools: [],
-            createdAt: new Date().toISOString(),
-            visibility: prompt.visibility || "public"
-          }
-        ],
+        versions: [version],
         author: {
           id: "current-user",
           name: "Current User",
@@ -161,15 +164,14 @@ export default function CreatePromptPage() {
       localStorage.setItem("prompts", JSON.stringify(updatedPrompts))
 
       // If a group was selected, update the group data
-      if (prompt.groupId) {
+      if (prompt.group) {
         const storedGroups = localStorage.getItem("groups")
         if (storedGroups) {
           const groups: Group[] = JSON.parse(storedGroups)
           const updatedGroups = groups.map((group) => {
-            if (group.id === prompt.groupId) {
+            if (group.id === prompt.group) {
               return {
                 ...group,
-                promptCount: (group.promptCount || 0) + 1,
                 prompts: [...(group.prompts || []), promptId],
                 updatedAt: new Date().toISOString()
               }
@@ -220,21 +222,10 @@ export default function CreatePromptPage() {
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="details">Details</Label>
-          <Textarea
-            id="details"
-            name="details"
-            value={prompt.details}
-            onChange={handleInputChange}
-            placeholder="Provide additional details about your prompt..."
-            rows={4}
-          />
-        </div>
-        <div className="space-y-2">
           <Label htmlFor="group">Group</Label>
           <div className="flex gap-2">
             <Select
-              value={prompt.groupId?.toString()}
+              value={prompt.group?.toString()}
               onValueChange={handleGroupChange}
             >
               <SelectTrigger className="flex-1">
@@ -242,8 +233,8 @@ export default function CreatePromptPage() {
               </SelectTrigger>
               <SelectContent>
                 {groups.map((group) => (
-                  <SelectItem key={group.id} value={group.id.toString()}>
-                    {group.name}
+                  <SelectItem key={group.id} value={group.id}>
+                    {group.id}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -257,16 +248,6 @@ export default function CreatePromptPage() {
               New Group
             </Button>
           </div>
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="useCases">Use Cases (comma-separated)</Label>
-          <Input
-            id="useCases"
-            name="useCases"
-            value={prompt.useCases?.join(", ")}
-            onChange={handleInputChange}
-            placeholder="e.g., Summarization, Expanding, Creative Writing"
-          />
         </div>
         <div className="space-y-2">
           <Label htmlFor="type">Type</Label>

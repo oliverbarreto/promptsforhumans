@@ -12,19 +12,27 @@ export interface PromptVersion {
   visibility: "public" | "private"
 }
 
+export interface Author {
+  id: string
+  name: string
+  email: string
+  avatar?: string
+}
+
 export interface Prompt {
   id: string
   title: string
   content: string
   group: string
+  groupId?: string
   tags?: string[]
   createdAt: string
   updatedAt: string
-}
-
-export type Author = {
-  id: string
-  name: string
-  email: string
-  avatar?: string
+  author: Author
+  versions: PromptVersion[]
+  currentVersion: string
+  visibility: "public" | "private"
+  isArchived: boolean
+  isFavorite: boolean
+  likes: number
 }
